@@ -1,0 +1,4 @@
+
+[workspace]
+resolver = "1"
+members = ["chord_map_egui", "print_note", "note_lib", "chord_map_native"]
