@@ -1,8 +1,10 @@
 use std::{
+    default,
     fmt::{Display, Formatter},
     ops::Add,
     vec,
 };
+use strum_macros::EnumIter;
 
 use crate::types::Hertz;
 
@@ -10,11 +12,12 @@ use super::Chord;
 
 static STRING_INPUTS_TO_RAW_NOTE_MAP: [(RawNote, [&str; 0]); 0] = [];
 
-#[derive(PartialEq, Clone, Copy, Debug)]
+#[derive(PartialEq, Clone, Copy, Debug, Default, EnumIter)]
 pub enum RawNote {
     /// A note that does not fit on the largely used 12-tone scale.
     Incongruent(Hertz),
     CFlat,
+    #[default]
     C,
     CSharp,
     DFlat,
@@ -38,6 +41,44 @@ pub enum RawNote {
 }
 
 impl RawNote {
+    pub fn is_analogous_to(&self, rhs: &RawNote) -> bool {
+        if self == rhs {
+            return true;
+        }
+
+        let rhs = *rhs;
+
+        match self {
+            RawNote::CFlat => rhs == RawNote::B,
+            RawNote::B => rhs == RawNote::CFlat,
+
+            RawNote::DFlat => rhs == RawNote::CSharp,
+            RawNote::CSharp => rhs == RawNote::DFlat,
+
+            RawNote::EFlat => rhs == RawNote::DSharp,
+            RawNote::DSharp => rhs == RawNote::EFlat,
+
+            RawNote::FFlat => rhs == RawNote::E,
+            RawNote::E => rhs == RawNote::FFlat,
+
+            RawNote::GFlat => rhs == RawNote::FSharp,
+            RawNote::FSharp => rhs == RawNote::GFlat,
+
+            RawNote::AFlat => rhs == RawNote::GSharp,
+            RawNote::GSharp => rhs == RawNote::AFlat,
+
+            RawNote::BFlat => rhs == RawNote::ASharp,
+            RawNote::ASharp => rhs == RawNote::BFlat,
+
+            RawNote::ESharp => rhs == RawNote::F,
+            RawNote::F => rhs == RawNote::ESharp,
+
+            RawNote::BSharp => rhs == RawNote::C,
+            RawNote::C => rhs == RawNote::BSharp,
+            _ => false,
+        }
+    }
+
     pub fn raw_note_to_basic_notation(raw_note: RawNote) -> &'static str {
         match raw_note {
             RawNote::Incongruent(_) => "Incongruent",
@@ -146,6 +187,28 @@ impl RawNote {
     }
 }
 
+pub const C_FLAT: RawNote = RawNote::CFlat;
+pub const C: RawNote = RawNote::C;
+pub const C_SHARP: RawNote = RawNote::CSharp;
+pub const D_FLAT: RawNote = RawNote::DFlat;
+pub const D: RawNote = RawNote::D;
+pub const D_SHARP: RawNote = RawNote::DSharp;
+pub const E_FLAT: RawNote = RawNote::EFlat;
+pub const E: RawNote = RawNote::E;
+pub const E_SHARP: RawNote = RawNote::ESharp;
+pub const F_FLAT: RawNote = RawNote::FFlat;
+pub const F: RawNote = RawNote::F;
+pub const F_SHARP: RawNote = RawNote::FSharp;
+pub const G_FLAT: RawNote = RawNote::GFlat;
+pub const G: RawNote = RawNote::G;
+pub const G_SHARP: RawNote = RawNote::GSharp;
+pub const A_FLAT: RawNote = RawNote::AFlat;
+pub const A: RawNote = RawNote::A;
+pub const A_SHARP: RawNote = RawNote::ASharp;
+pub const B_FLAT: RawNote = RawNote::BFlat;
+pub const B: RawNote = RawNote::B;
+pub const B_SHARP: RawNote = RawNote::BSharp;
+
 pub struct IntoRawNoteError;
 
 impl TryFrom<String> for RawNote {
@@ -155,7 +218,8 @@ impl TryFrom<String> for RawNote {
         todo!()
     }
 }
-#[derive(PartialEq, Clone, Debug, Copy)]
+
+#[derive(PartialEq, Clone, Debug, Copy, Default)]
 pub struct Note {
     raw_note: RawNote,
     octave: i16,
@@ -172,6 +236,93 @@ impl Note {
 
     pub fn octave(&self) -> i16 {
         self.octave
+    }
+
+    pub fn raw_note(&self) -> RawNote {
+        self.raw_note
+    }
+
+    pub fn from_semitones_from_c0(semitones_from_low_c: u32) -> Note {
+        let mut current_semitones = semitones_from_low_c;
+        let mut octave = 0;
+        let mut note = RawNote::C;
+
+        while current_semitones >= 12 {
+            current_semitones -= 12;
+            octave += 1;
+        }
+
+        while current_semitones > 0 {
+            current_semitones -= 1;
+            note = match note {
+                RawNote::C => RawNote::CSharp,
+                RawNote::CSharp => RawNote::D,
+                RawNote::D => RawNote::DSharp,
+                RawNote::DSharp => RawNote::E,
+                RawNote::E => RawNote::F,
+                RawNote::F => RawNote::FSharp,
+                RawNote::FSharp => RawNote::G,
+                RawNote::G => RawNote::GSharp,
+                RawNote::GSharp => RawNote::A,
+                RawNote::A => RawNote::ASharp,
+                RawNote::ASharp => RawNote::B,
+                RawNote::B => RawNote::C,
+                RawNote::CFlat => RawNote::B,
+                RawNote::BFlat => RawNote::A,
+                RawNote::EFlat => RawNote::D,
+                RawNote::FFlat => RawNote::E,
+                RawNote::GFlat => RawNote::F,
+                RawNote::AFlat => RawNote::G,
+                RawNote::DFlat => RawNote::C,
+                RawNote::ESharp => RawNote::FSharp,
+                RawNote::BSharp => RawNote::CSharp,
+                RawNote::Incongruent(_) => unreachable!(),
+            }
+        }
+
+        Note::new(note, octave as i16)
+    }
+
+    pub fn to_semitones_from_c0(&self) -> u32 {
+        let mut semitones = 0;
+
+        let mut current_octave = 0;
+        let mut current_note = RawNote::C;
+
+        while current_octave < self.octave {
+            current_octave += 1;
+        }
+
+        while !current_note.is_analogous_to(&self.raw_note) {
+            semitones += 1;
+            current_note = match current_note {
+                RawNote::C | RawNote::BSharp => RawNote::CSharp,
+                RawNote::CSharp | RawNote::DFlat => RawNote::D,
+                RawNote::D => RawNote::DSharp,
+                RawNote::DSharp | RawNote::EFlat => RawNote::E,
+                RawNote::E | RawNote::FFlat => RawNote::F,
+                RawNote::F | RawNote::ESharp => RawNote::FSharp,
+                RawNote::FSharp | RawNote::GFlat => RawNote::G,
+                RawNote::G => RawNote::GSharp,
+                RawNote::GSharp | RawNote::AFlat => RawNote::A,
+                RawNote::A => RawNote::ASharp,
+                RawNote::ASharp | RawNote::BFlat => RawNote::B,
+                RawNote::B | RawNote::CFlat => RawNote::C,
+                RawNote::Incongruent(_) => unreachable!(),
+            }
+        }
+
+        semitones + (current_octave as u32 * 12)
+    }
+
+    pub fn add_semitones(&self, semitones: i32) -> Note {
+        let new_semitones = self.to_semitones_from_c0() as i32 + semitones;
+
+        if new_semitones < 0 {
+            panic!("Cannot add semitones to a note that would result in a negative semitone value.")
+        };
+
+        Note::from_semitones_from_c0(new_semitones as u32)
     }
 }
 

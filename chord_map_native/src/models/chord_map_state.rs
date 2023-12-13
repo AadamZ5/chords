@@ -1,9 +1,9 @@
-use super::chord_ctx::ChordCtx;
+use super::chord_view_context::ChordViewContext;
 
 #[derive(Debug, Default)]
 pub struct ChordMapState {
-    pub delete_chord: Option<ChordCtx>,
-    pub chord_ctxs: Vec<ChordCtx>,
+    pub delete_chord: Option<ChordViewContext>,
+    pub chord_views: Vec<ChordViewContext>,
 
     /// Map X offset from center
     pub map_x: f64,

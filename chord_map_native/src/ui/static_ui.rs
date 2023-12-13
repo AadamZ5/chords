@@ -1,22 +1,23 @@
-use chord_map_egui::widgets::ChordModifier;
+use chord_map_egui::widgets::{ChordEdit, ChordView};
 use eframe::{
     egui::{Area, Context, Window},
     epaint::Pos2,
     Frame,
 };
-use note_lib::models::{Chord, Note, RawNote};
+use note_lib::models::{Chord, ChordQuality, Note, RawNote, C};
 
-use crate::models::{chord_ctx::ChordCtx, chord_map_state::ChordMapState};
+use crate::models::{chord_map_state::ChordMapState, chord_view_context::ChordViewContext};
 
 pub fn main_ui(ctx: &Context, app_context: &mut ChordMapState) {
     let ChordMapState {
-        ref mut chord_ctxs, ..
+        chord_views: ref mut chord_ctxs,
+        ..
     } = app_context;
 
     eframe::egui::CentralPanel::default().show(ctx, |ui| {
         let clicked = ui.button("Add Chord").clicked();
         if clicked {
-            let mut new_ctx = ChordCtx::new(Chord::default());
+            let mut new_ctx = ChordViewContext::new(Note::new(C, 4), ChordQuality::Major);
             new_ctx.window_open = true;
             chord_ctxs.push(new_ctx);
         }
@@ -25,13 +26,14 @@ pub fn main_ui(ctx: &Context, app_context: &mut ChordMapState) {
 
 pub fn chords_edit_windows(ctx: &Context, app_context: &mut ChordMapState) {
     let ChordMapState {
-        ref mut chord_ctxs, ..
+        ref mut chord_views,
+        ..
     } = app_context;
 
-    for chord_ctx in chord_ctxs.iter_mut() {
-        let chord_id = chord_ctx.id().to_string();
+    for chord_view in chord_views.iter_mut() {
+        let chord_id = chord_view.id().to_string();
         let window_id: eframe::egui::Id = chord_id.clone().into();
-        let open_ctx = &mut chord_ctx.window_open;
+        let open_ctx = &mut chord_view.window_open;
 
         Window::new("Chord")
             .id(window_id)
@@ -40,15 +42,15 @@ pub fn chords_edit_windows(ctx: &Context, app_context: &mut ChordMapState) {
             .movable(true)
             .resizable(true)
             .show(ctx, |ui| {
-                ui.heading(chord_id);
-                ui.add(ChordModifier::new(&mut chord_ctx.chord));
+                ui.add(ChordEdit::new(&mut chord_view.chord_context));
             });
     }
 }
 
 pub fn chords_display(ctx: &Context, app_context: &mut ChordMapState) {
     let ChordMapState {
-        ref mut chord_ctxs, ..
+        chord_views: ref mut chord_ctxs,
+        ..
     } = app_context;
 
     for chord_ctx in chord_ctxs.iter_mut() {
@@ -61,8 +63,19 @@ pub fn chords_display(ctx: &Context, app_context: &mut ChordMapState) {
             .movable(true)
             .current_pos(pos)
             .show(ctx, |ui| {
-                ui.heading(chord_id);
-                ui.add(ChordModifier::new(&mut chord_ctx.chord));
+                ui.group(|ui| {
+                    ui.add(ChordView::new(&mut chord_ctx.chord_context));
+
+                    let button_text = if chord_ctx.window_open {
+                        "Close"
+                    } else {
+                        "Edit"
+                    };
+
+                    if ui.button(button_text).clicked() {
+                        chord_ctx.window_open = !chord_ctx.window_open;
+                    }
+                })
             });
 
         let [dx, dy] = area_response.response.drag_delta().into();

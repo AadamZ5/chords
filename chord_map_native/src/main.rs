@@ -8,10 +8,10 @@ use std::{
     },
 };
 
-use chord_map_egui::widgets::{chord_summary, ChordModifier};
+use chord_map_egui::widgets::ChordEdit;
 use eframe::egui::Window;
-use models::chord_ctx::ChordCtx;
 use models::chord_map_state::ChordMapState;
+use models::chord_view_context::ChordViewContext;
 use note_lib::models::{Chord, Note, RawNote};
 
 fn main() -> Result<(), eframe::Error> {

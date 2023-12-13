@@ -1,11 +1,12 @@
+use chord_map_egui::models::chord_context::ChordContext;
 use eframe::egui::Id;
-use note_lib::models::Chord;
+use note_lib::models::{Chord, ChordQuality, Note};
 use uuid::Uuid;
 
 #[derive(Debug, Default)]
-pub struct ChordCtx {
+pub struct ChordViewContext {
     id: Uuid,
-    pub chord: Chord,
+    pub chord_context: ChordContext,
     pub window_open: bool,
 
     /// X offset from the center of the map
@@ -14,12 +15,12 @@ pub struct ChordCtx {
     pub map_y: f64,
 }
 
-impl ChordCtx {
-    pub fn new(chord: Chord) -> Self {
+impl ChordViewContext {
+    pub fn new(chord_root: Note, chord_quality: ChordQuality) -> Self {
         Self {
             id: Uuid::new_v4(),
             window_open: false,
-            chord,
+            chord_context: ChordContext::new(chord_root, chord_quality),
 
             ..Default::default()
         }
@@ -35,13 +36,13 @@ impl ChordCtx {
     }
 }
 
-impl Into<Id> for ChordCtx {
+impl Into<Id> for ChordViewContext {
     fn into(self) -> Id {
         Id::new(self.id.to_string())
     }
 }
 
-impl Into<Id> for &ChordCtx {
+impl Into<Id> for &ChordViewContext {
     fn into(self) -> Id {
         Id::new(self.id.to_string())
     }

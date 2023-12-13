@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 note_lib = { path = "../note_lib" }
 egui = "0.24.1"
+strum = "0.25.0"
