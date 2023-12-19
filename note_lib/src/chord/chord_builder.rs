@@ -1,4 +1,5 @@
-use super::{chord_quality::ChordQuality, Chord, Note};
+use super::{chord_quality::ChordQuality, Chord};
+use crate::Note;
 
 pub struct ChordBuilder {
     root: Note,

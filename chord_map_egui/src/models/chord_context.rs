@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use note_lib::models::{Chord, ChordQuality, Note};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ChordContext {
     root: Note,
     quality: ChordQuality,

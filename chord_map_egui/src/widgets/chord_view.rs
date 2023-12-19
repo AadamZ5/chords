@@ -1,38 +1,22 @@
 use std::fmt::format;
 
-use egui::{Response, Widget};
+use egui::{Grid, Response, Ui, Widget};
 use note_lib::models::Chord;
 
 use crate::models::chord_context::ChordContext;
 
-#[derive(Debug)]
-pub struct ChordView<'a> {
-    chord_ctx: &'a mut ChordContext,
-}
+pub fn chord_view(ui: &mut Ui, chord_ctx: &mut ChordContext) {
+    let label_response = ui.heading(format!("{}", chord_ctx));
 
-impl<'a> ChordView<'a> {
-    pub fn new(chord: &'a mut ChordContext) -> Self {
-        Self { chord_ctx: chord }
-    }
-}
-
-impl<'a> Widget for ChordView<'a> {
-    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        let chord_ctx = self.chord_ctx;
-
-        let label_response = ui.heading(format!("{}", chord_ctx));
-
-        let combined_note_responses = chord_ctx
-            .get_calculated_chord()
-            .notes()
-            .iter()
-            .map(|note| ui.label(format!("\t{:#}", note)))
-            .reduce(|a, b| a.union(b));
-
-        if let Some(combined_note_responses) = combined_note_responses {
-            combined_note_responses.union(label_response)
-        } else {
-            label_response
-        }
-    }
+    let note_grid_response = Grid::new("note_grid")
+        .spacing([2.0, 2.0])
+        .min_col_width(0.0)
+        .show(ui, |ui| {
+            chord_ctx
+                .get_calculated_chord()
+                .notes()
+                .iter()
+                .map(|note| ui.small_button(format!("{:#}", note)))
+                .reduce(|a, b| a.union(b))
+        });
 }

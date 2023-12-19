@@ -8,7 +8,6 @@ use std::{
     },
 };
 
-use chord_map_egui::widgets::ChordEdit;
 use eframe::egui::Window;
 use models::chord_map_state::ChordMapState;
 use models::chord_view_context::ChordViewContext;

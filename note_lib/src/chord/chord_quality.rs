@@ -1,6 +1,5 @@
-use std::{default, fmt::Display};
-
-use super::{Chord, Note};
+use super::Chord;
+use crate::{Interval, Note};
 
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub enum ChordQuality {
@@ -28,7 +27,31 @@ pub enum ChordQuality {
     Suspended4th,
 }
 
+fn major_intervals() -> Vec<Interval> {
+    vec![
+        Interval::PerfectUnison,
+        Interval::MajorThird,
+        Interval::PerfectFifth,
+    ]
+}
+
+fn major_6th_intervals() -> Vec<Interval> {
+    let mut intervals = major_intervals();
+    intervals.push(Interval::MajorSixth);
+    intervals
+}
+
+fn major_7th_intervals() -> Vec<Interval> {
+    let mut intervals = major_intervals();
+    intervals.push(Interval::MajorSeventh);
+    intervals
+}
+
 impl ChordQuality {
+    pub fn to_intervals(&self) -> Vec<Interval> {
+        todo!()
+    }
+
     pub fn to_notes(&self, root: Note) -> Vec<Note> {
         match self {
             ChordQuality::Major => {

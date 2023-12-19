@@ -1,6 +1,6 @@
 use std::ops::Add;
 
-use super::Note;
+use crate::Note;
 
 #[derive(PartialEq, Clone, Debug, Default)]
 pub struct Chord {
@@ -37,7 +37,7 @@ impl Chord {
             while inversion > 0 {
                 let note = notes.remove(0);
                 // Move the note up an octave.
-                let note = Note::new(note.raw_note(), note.octave() + 1);
+                let note = Note::new(note.raw_note(), note.octave() + 1, note.modifier());
                 notes.push(note);
                 inversion -= 1
             }
@@ -46,7 +46,7 @@ impl Chord {
             while inversion < 0 {
                 let note = notes.remove(notes.len() - 1);
                 // Move the note down an octave.
-                let note = Note::new(note.raw_note(), note.octave() - 1);
+                let note = Note::new(note.raw_note(), note.octave() - 1, note.modifier());
                 notes.insert(0, note);
                 inversion += 1;
             }
@@ -76,61 +76,93 @@ impl Add<Note> for Chord {
 #[cfg(test)]
 mod tests {
 
-    use crate::models::{B, C, E, G};
+    use crate::{NoteModifier, B, C, E, G};
 
     use super::*;
 
     #[test]
     fn a_chord_is_created() {
-        let chord = Chord::new(vec![Note::new(C, 4), Note::new(E, 4), Note::new(G, 4)]);
+        let chord = Chord::new(vec![
+            Note::new(C, 4, NoteModifier::Natural),
+            Note::new(E, 4, NoteModifier::Natural),
+            Note::new(G, 4, NoteModifier::Natural),
+        ]);
         assert_eq!(
             chord.notes,
-            vec![Note::new(C, 4), Note::new(E, 4), Note::new(G, 4)]
+            vec![
+                Note::new(C, 4, NoteModifier::Natural),
+                Note::new(E, 4, NoteModifier::Natural),
+                Note::new(G, 4, NoteModifier::Natural)
+            ]
         );
     }
 
     #[test]
     fn chord_note_is_added() {
-        let chord = Chord::new(vec![Note::new(C, 4), Note::new(E, 4), Note::new(G, 4)]);
+        let chord = Chord::new(vec![
+            Note::new(C, 4, NoteModifier::Natural),
+            Note::new(E, 4, NoteModifier::Natural),
+            Note::new(G, 4, NoteModifier::Natural),
+        ]);
 
-        let add_7 = chord + Note::new(B, 4);
+        let add_7 = chord + Note::new(B, 4, NoteModifier::Natural);
         assert_eq!(
             add_7.notes,
             vec![
-                Note::new(C, 4),
-                Note::new(E, 4),
-                Note::new(G, 4),
-                Note::new(B, 4)
+                Note::new(C, 4, NoteModifier::Natural),
+                Note::new(E, 4, NoteModifier::Natural),
+                Note::new(G, 4, NoteModifier::Natural),
+                Note::new(B, 4, NoteModifier::Natural)
             ]
         );
     }
 
     #[test]
     fn inversion_is_applied() {
-        let initial_chord = Chord::new(vec![Note::new(C, 4), Note::new(E, 4), Note::new(G, 4)]);
+        let initial_chord = Chord::new(vec![
+            Note::new(C, 4, NoteModifier::Natural),
+            Note::new(E, 4, NoteModifier::Natural),
+            Note::new(G, 4, NoteModifier::Natural),
+        ]);
 
         let first_inversion = initial_chord.apply_inversion(1);
         assert_eq!(
             first_inversion.notes,
-            vec![Note::new(E, 4), Note::new(G, 4), Note::new(C, 5)]
+            vec![
+                Note::new(E, 4, NoteModifier::Natural),
+                Note::new(G, 4, NoteModifier::Natural),
+                Note::new(C, 5, NoteModifier::Natural)
+            ]
         );
 
         let second_inversion = initial_chord.apply_inversion(2);
         assert_eq!(
             second_inversion.notes,
-            vec![Note::new(G, 4), Note::new(C, 5), Note::new(E, 5)]
+            vec![
+                Note::new(G, 4, NoteModifier::Natural),
+                Note::new(C, 5, NoteModifier::Natural),
+                Note::new(E, 5, NoteModifier::Natural)
+            ]
         );
 
         let zero_inversion = initial_chord.apply_inversion(0);
         assert_eq!(
             zero_inversion.notes,
-            vec![Note::new(C, 4), Note::new(E, 4), Note::new(G, 4)]
+            vec![
+                Note::new(C, 4, NoteModifier::Natural),
+                Note::new(E, 4, NoteModifier::Natural),
+                Note::new(G, 4, NoteModifier::Natural)
+            ]
         );
 
         let negative_inversion = initial_chord.apply_inversion(-1);
         assert_eq!(
             negative_inversion.notes,
-            vec![Note::new(G, 3), Note::new(C, 4), Note::new(E, 4)]
+            vec![
+                Note::new(G, 3, NoteModifier::Natural),
+                Note::new(C, 4, NoteModifier::Natural),
+                Note::new(E, 4, NoteModifier::Natural)
+            ]
         );
     }
 }

@@ -1,5 +1,5 @@
 use chord_map_egui::models::chord_context::ChordContext;
-use eframe::egui::Id;
+use eframe::{egui::Id, epaint::Pos2};
 use note_lib::models::{Chord, ChordQuality, Note};
 use uuid::Uuid;
 
@@ -7,12 +7,10 @@ use uuid::Uuid;
 pub struct ChordViewContext {
     id: Uuid,
     pub chord_context: ChordContext,
+    pub editing_chord_context: Option<ChordContext>,
     pub window_open: bool,
 
-    /// X offset from the center of the map
-    pub map_x: f64,
-    /// Y offset from the center of the map
-    pub map_y: f64,
+    pub map_pos: Pos2,
 }
 
 impl ChordViewContext {
@@ -26,9 +24,8 @@ impl ChordViewContext {
         }
     }
 
-    pub fn set_position(&mut self, x: f64, y: f64) {
-        self.map_x = x;
-        self.map_y = y;
+    pub fn set_position(&mut self, pos: Pos2) {
+        self.map_pos = pos;
     }
 
     pub fn id(&self) -> uuid::Uuid {
