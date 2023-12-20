@@ -1,5 +1,5 @@
 use super::{AbstractNote, ModifierPreference, NoteModifier, RawNote};
-use crate::{Chord, Hertz, Interval, IntervalFromSemitones, Octave, Semitone};
+use crate::{Chord, Hertz, Octave, Semitone, SimpleInterval, SimpleIntervalFromSemitones};
 use std::{
     fmt::{Display, Formatter},
     ops::Add,
@@ -40,19 +40,22 @@ impl Note {
         semitones_from_low_c: Semitone,
         modifier_preference: ModifierPreference,
     ) -> Note {
-        let IntervalFromSemitones {
+        let SimpleIntervalFromSemitones {
             interval,
             mut octave_overflow,
-        } = Interval::from_semitone_interval(semitones_from_low_c as i32);
+        } = SimpleInterval::from_semitones(semitones_from_low_c as i32);
 
         let abstract_note = match interval {
             // A perfect octave interval translates to a note in the next
             // octave. Since octaves aren't encoded in intervals, this is
             // missed. If it is a perfect octave, make it a perfect unison
             // in the next octave.
-            Interval::PerfectOctave => {
+            SimpleInterval::PerfectOctave => {
                 octave_overflow += 1;
-                AbstractNote::from_interval_from_c(Interval::PerfectUnison, modifier_preference)
+                AbstractNote::from_interval_from_c(
+                    SimpleInterval::PerfectUnison,
+                    modifier_preference,
+                )
             }
             _ => AbstractNote::from_interval_from_c(interval, modifier_preference),
         };

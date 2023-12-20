@@ -1,6 +1,5 @@
-use crate::AbstractNote;
-
-use super::{Interval, ScaleDegree};
+use super::ScaleDegree;
+use crate::{AbstractNote, SimpleInterval};
 
 /// ScaleMode represents the various patterns of notes that can be created
 /// from a root note.
@@ -52,94 +51,94 @@ pub enum ScaleMode {
     Locrian,
 }
 
-fn ionian_intervals(degree: ScaleDegree) -> Interval {
+fn ionian_intervals(degree: ScaleDegree) -> SimpleInterval {
     match degree {
-        ScaleDegree::First => Interval::PerfectUnison,
-        ScaleDegree::Second => Interval::MajorSecond,
-        ScaleDegree::Third => Interval::MajorThird,
-        ScaleDegree::Fourth => Interval::PerfectFourth,
-        ScaleDegree::Fifth => Interval::PerfectFifth,
-        ScaleDegree::Sixth => Interval::MajorSixth,
-        ScaleDegree::Seventh => Interval::MajorSeventh,
-        ScaleDegree::Octave => Interval::PerfectOctave,
+        ScaleDegree::First => SimpleInterval::PerfectUnison,
+        ScaleDegree::Second => SimpleInterval::MajorSecond,
+        ScaleDegree::Third => SimpleInterval::MajorThird,
+        ScaleDegree::Fourth => SimpleInterval::PerfectFourth,
+        ScaleDegree::Fifth => SimpleInterval::PerfectFifth,
+        ScaleDegree::Sixth => SimpleInterval::MajorSixth,
+        ScaleDegree::Seventh => SimpleInterval::MajorSeventh,
+        ScaleDegree::Octave => SimpleInterval::PerfectOctave,
     }
 }
 
-fn dorian_intervals(degree: ScaleDegree) -> Interval {
+fn dorian_intervals(degree: ScaleDegree) -> SimpleInterval {
     match degree {
-        ScaleDegree::First => Interval::PerfectUnison,
-        ScaleDegree::Second => Interval::MajorSecond,
-        ScaleDegree::Third => Interval::MinorThird,
-        ScaleDegree::Fourth => Interval::PerfectFourth,
-        ScaleDegree::Fifth => Interval::PerfectFifth,
-        ScaleDegree::Sixth => Interval::MajorSixth,
-        ScaleDegree::Seventh => Interval::MinorSeventh,
-        ScaleDegree::Octave => Interval::PerfectOctave,
+        ScaleDegree::First => SimpleInterval::PerfectUnison,
+        ScaleDegree::Second => SimpleInterval::MajorSecond,
+        ScaleDegree::Third => SimpleInterval::MinorThird,
+        ScaleDegree::Fourth => SimpleInterval::PerfectFourth,
+        ScaleDegree::Fifth => SimpleInterval::PerfectFifth,
+        ScaleDegree::Sixth => SimpleInterval::MajorSixth,
+        ScaleDegree::Seventh => SimpleInterval::MinorSeventh,
+        ScaleDegree::Octave => SimpleInterval::PerfectOctave,
     }
 }
 
-fn phrygian_intervals(degree: ScaleDegree) -> Interval {
+fn phrygian_intervals(degree: ScaleDegree) -> SimpleInterval {
     match degree {
-        ScaleDegree::First => Interval::PerfectUnison,
-        ScaleDegree::Second => Interval::MinorSecond,
-        ScaleDegree::Third => Interval::MinorThird,
-        ScaleDegree::Fourth => Interval::PerfectFourth,
-        ScaleDegree::Fifth => Interval::PerfectFifth,
-        ScaleDegree::Sixth => Interval::MinorSixth,
-        ScaleDegree::Seventh => Interval::MinorSeventh,
-        ScaleDegree::Octave => Interval::PerfectOctave,
+        ScaleDegree::First => SimpleInterval::PerfectUnison,
+        ScaleDegree::Second => SimpleInterval::MinorSecond,
+        ScaleDegree::Third => SimpleInterval::MinorThird,
+        ScaleDegree::Fourth => SimpleInterval::PerfectFourth,
+        ScaleDegree::Fifth => SimpleInterval::PerfectFifth,
+        ScaleDegree::Sixth => SimpleInterval::MinorSixth,
+        ScaleDegree::Seventh => SimpleInterval::MinorSeventh,
+        ScaleDegree::Octave => SimpleInterval::PerfectOctave,
     }
 }
 
-fn lydian_intervals(degree: ScaleDegree) -> Interval {
+fn lydian_intervals(degree: ScaleDegree) -> SimpleInterval {
     match degree {
-        ScaleDegree::First => Interval::PerfectUnison,
-        ScaleDegree::Second => Interval::MajorSecond,
-        ScaleDegree::Third => Interval::MajorThird,
-        ScaleDegree::Fourth => Interval::AugmentedFourth,
-        ScaleDegree::Fifth => Interval::PerfectFifth,
-        ScaleDegree::Sixth => Interval::MajorSixth,
-        ScaleDegree::Seventh => Interval::MajorSeventh,
-        ScaleDegree::Octave => Interval::PerfectOctave,
+        ScaleDegree::First => SimpleInterval::PerfectUnison,
+        ScaleDegree::Second => SimpleInterval::MajorSecond,
+        ScaleDegree::Third => SimpleInterval::MajorThird,
+        ScaleDegree::Fourth => SimpleInterval::AugmentedFourth,
+        ScaleDegree::Fifth => SimpleInterval::PerfectFifth,
+        ScaleDegree::Sixth => SimpleInterval::MajorSixth,
+        ScaleDegree::Seventh => SimpleInterval::MajorSeventh,
+        ScaleDegree::Octave => SimpleInterval::PerfectOctave,
     }
 }
 
-fn mixolydian_intervals(degree: ScaleDegree) -> Interval {
+fn mixolydian_intervals(degree: ScaleDegree) -> SimpleInterval {
     match degree {
-        ScaleDegree::First => Interval::PerfectUnison,
-        ScaleDegree::Second => Interval::MajorSecond,
-        ScaleDegree::Third => Interval::MajorThird,
-        ScaleDegree::Fourth => Interval::PerfectFourth,
-        ScaleDegree::Fifth => Interval::PerfectFifth,
-        ScaleDegree::Sixth => Interval::MajorSixth,
-        ScaleDegree::Seventh => Interval::MinorSeventh,
-        ScaleDegree::Octave => Interval::PerfectOctave,
+        ScaleDegree::First => SimpleInterval::PerfectUnison,
+        ScaleDegree::Second => SimpleInterval::MajorSecond,
+        ScaleDegree::Third => SimpleInterval::MajorThird,
+        ScaleDegree::Fourth => SimpleInterval::PerfectFourth,
+        ScaleDegree::Fifth => SimpleInterval::PerfectFifth,
+        ScaleDegree::Sixth => SimpleInterval::MajorSixth,
+        ScaleDegree::Seventh => SimpleInterval::MinorSeventh,
+        ScaleDegree::Octave => SimpleInterval::PerfectOctave,
     }
 }
 
-fn aeolian_intervals(degree: ScaleDegree) -> Interval {
+fn aeolian_intervals(degree: ScaleDegree) -> SimpleInterval {
     match degree {
-        ScaleDegree::First => Interval::PerfectUnison,
-        ScaleDegree::Second => Interval::MajorSecond,
-        ScaleDegree::Third => Interval::MinorThird,
-        ScaleDegree::Fourth => Interval::PerfectFourth,
-        ScaleDegree::Fifth => Interval::PerfectFifth,
-        ScaleDegree::Sixth => Interval::MinorSixth,
-        ScaleDegree::Seventh => Interval::MinorSeventh,
-        ScaleDegree::Octave => Interval::PerfectOctave,
+        ScaleDegree::First => SimpleInterval::PerfectUnison,
+        ScaleDegree::Second => SimpleInterval::MajorSecond,
+        ScaleDegree::Third => SimpleInterval::MinorThird,
+        ScaleDegree::Fourth => SimpleInterval::PerfectFourth,
+        ScaleDegree::Fifth => SimpleInterval::PerfectFifth,
+        ScaleDegree::Sixth => SimpleInterval::MinorSixth,
+        ScaleDegree::Seventh => SimpleInterval::MinorSeventh,
+        ScaleDegree::Octave => SimpleInterval::PerfectOctave,
     }
 }
 
-fn locrian_intervals(degree: ScaleDegree) -> Interval {
+fn locrian_intervals(degree: ScaleDegree) -> SimpleInterval {
     match degree {
-        ScaleDegree::First => Interval::PerfectUnison,
-        ScaleDegree::Second => Interval::MinorSecond,
-        ScaleDegree::Third => Interval::MinorThird,
-        ScaleDegree::Fourth => Interval::PerfectFourth,
-        ScaleDegree::Fifth => Interval::DiminishedFifth,
-        ScaleDegree::Sixth => Interval::MinorSixth,
-        ScaleDegree::Seventh => Interval::MinorSeventh,
-        ScaleDegree::Octave => Interval::PerfectOctave,
+        ScaleDegree::First => SimpleInterval::PerfectUnison,
+        ScaleDegree::Second => SimpleInterval::MinorSecond,
+        ScaleDegree::Third => SimpleInterval::MinorThird,
+        ScaleDegree::Fourth => SimpleInterval::PerfectFourth,
+        ScaleDegree::Fifth => SimpleInterval::DiminishedFifth,
+        ScaleDegree::Sixth => SimpleInterval::MinorSixth,
+        ScaleDegree::Seventh => SimpleInterval::MinorSeventh,
+        ScaleDegree::Octave => SimpleInterval::PerfectOctave,
     }
 }
 
@@ -151,15 +150,15 @@ impl ScaleMode {
     /// at a degree using this funciton.
     ///
     /// ```rust
-    /// use note_lib::{ScaleDegree, ScaleMode, Interval};
+    /// use note_lib::{ScaleDegree, ScaleMode, SimpleInterval};
     ///
     /// let mode = ScaleMode::Ionian;
     ///
     /// let interval_at_three = mode.interval_at_degree(ScaleDegree::Third);
-    /// assert_eq!(interval_at_three, Interval::MajorThird);
+    /// assert_eq!(interval_at_three, SimpleInterval::MajorThird);
     /// ```
     ///
-    pub fn interval_at_degree(&self, degree: ScaleDegree) -> Interval {
+    pub fn interval_at_degree(&self, degree: ScaleDegree) -> SimpleInterval {
         match self {
             ScaleMode::Ionian => ionian_intervals(degree),
             ScaleMode::Dorian => dorian_intervals(degree),
@@ -199,11 +198,11 @@ mod tests {
         let mode = ScaleMode::Ionian;
         assert_eq!(
             mode.interval_at_degree(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
         assert_eq!(
             mode.interval_at_degree(ScaleDegree::Seventh),
-            Interval::MajorSeventh
+            SimpleInterval::MajorSeventh
         );
     }
 
@@ -240,23 +239,35 @@ mod tests {
     fn assert_ionian_intervals() {
         assert_eq!(
             ionian_intervals(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
-        assert_eq!(ionian_intervals(ScaleDegree::Second), Interval::MajorSecond);
-        assert_eq!(ionian_intervals(ScaleDegree::Third), Interval::MajorThird);
+        assert_eq!(
+            ionian_intervals(ScaleDegree::Second),
+            SimpleInterval::MajorSecond
+        );
+        assert_eq!(
+            ionian_intervals(ScaleDegree::Third),
+            SimpleInterval::MajorThird
+        );
         assert_eq!(
             ionian_intervals(ScaleDegree::Fourth),
-            Interval::PerfectFourth
+            SimpleInterval::PerfectFourth
         );
-        assert_eq!(ionian_intervals(ScaleDegree::Fifth), Interval::PerfectFifth);
-        assert_eq!(ionian_intervals(ScaleDegree::Sixth), Interval::MajorSixth);
+        assert_eq!(
+            ionian_intervals(ScaleDegree::Fifth),
+            SimpleInterval::PerfectFifth
+        );
+        assert_eq!(
+            ionian_intervals(ScaleDegree::Sixth),
+            SimpleInterval::MajorSixth
+        );
         assert_eq!(
             ionian_intervals(ScaleDegree::Seventh),
-            Interval::MajorSeventh
+            SimpleInterval::MajorSeventh
         );
         assert_eq!(
             ionian_intervals(ScaleDegree::Octave),
-            Interval::PerfectOctave
+            SimpleInterval::PerfectOctave
         );
     }
 
@@ -264,23 +275,35 @@ mod tests {
     fn assert_dorian_intervals() {
         assert_eq!(
             dorian_intervals(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
-        assert_eq!(dorian_intervals(ScaleDegree::Second), Interval::MajorSecond);
-        assert_eq!(dorian_intervals(ScaleDegree::Third), Interval::MinorThird);
+        assert_eq!(
+            dorian_intervals(ScaleDegree::Second),
+            SimpleInterval::MajorSecond
+        );
+        assert_eq!(
+            dorian_intervals(ScaleDegree::Third),
+            SimpleInterval::MinorThird
+        );
         assert_eq!(
             dorian_intervals(ScaleDegree::Fourth),
-            Interval::PerfectFourth
+            SimpleInterval::PerfectFourth
         );
-        assert_eq!(dorian_intervals(ScaleDegree::Fifth), Interval::PerfectFifth);
-        assert_eq!(dorian_intervals(ScaleDegree::Sixth), Interval::MajorSixth);
+        assert_eq!(
+            dorian_intervals(ScaleDegree::Fifth),
+            SimpleInterval::PerfectFifth
+        );
+        assert_eq!(
+            dorian_intervals(ScaleDegree::Sixth),
+            SimpleInterval::MajorSixth
+        );
         assert_eq!(
             dorian_intervals(ScaleDegree::Seventh),
-            Interval::MinorSeventh
+            SimpleInterval::MinorSeventh
         );
         assert_eq!(
             dorian_intervals(ScaleDegree::Octave),
-            Interval::PerfectOctave
+            SimpleInterval::PerfectOctave
         );
     }
 
@@ -288,29 +311,35 @@ mod tests {
     fn assert_phrygian_intervals() {
         assert_eq!(
             phrygian_intervals(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
         assert_eq!(
             phrygian_intervals(ScaleDegree::Second),
-            Interval::MinorSecond
+            SimpleInterval::MinorSecond
         );
-        assert_eq!(phrygian_intervals(ScaleDegree::Third), Interval::MinorThird);
+        assert_eq!(
+            phrygian_intervals(ScaleDegree::Third),
+            SimpleInterval::MinorThird
+        );
         assert_eq!(
             phrygian_intervals(ScaleDegree::Fourth),
-            Interval::PerfectFourth
+            SimpleInterval::PerfectFourth
         );
         assert_eq!(
             phrygian_intervals(ScaleDegree::Fifth),
-            Interval::PerfectFifth
+            SimpleInterval::PerfectFifth
         );
-        assert_eq!(phrygian_intervals(ScaleDegree::Sixth), Interval::MinorSixth);
+        assert_eq!(
+            phrygian_intervals(ScaleDegree::Sixth),
+            SimpleInterval::MinorSixth
+        );
         assert_eq!(
             phrygian_intervals(ScaleDegree::Seventh),
-            Interval::MinorSeventh
+            SimpleInterval::MinorSeventh
         );
         assert_eq!(
             phrygian_intervals(ScaleDegree::Octave),
-            Interval::PerfectOctave
+            SimpleInterval::PerfectOctave
         );
     }
 
@@ -318,23 +347,35 @@ mod tests {
     fn assert_lydian_intervals() {
         assert_eq!(
             lydian_intervals(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
-        assert_eq!(lydian_intervals(ScaleDegree::Second), Interval::MajorSecond);
-        assert_eq!(lydian_intervals(ScaleDegree::Third), Interval::MajorThird);
+        assert_eq!(
+            lydian_intervals(ScaleDegree::Second),
+            SimpleInterval::MajorSecond
+        );
+        assert_eq!(
+            lydian_intervals(ScaleDegree::Third),
+            SimpleInterval::MajorThird
+        );
         assert_eq!(
             lydian_intervals(ScaleDegree::Fourth),
-            Interval::AugmentedFourth
+            SimpleInterval::AugmentedFourth
         );
-        assert_eq!(lydian_intervals(ScaleDegree::Fifth), Interval::PerfectFifth);
-        assert_eq!(lydian_intervals(ScaleDegree::Sixth), Interval::MajorSixth);
+        assert_eq!(
+            lydian_intervals(ScaleDegree::Fifth),
+            SimpleInterval::PerfectFifth
+        );
+        assert_eq!(
+            lydian_intervals(ScaleDegree::Sixth),
+            SimpleInterval::MajorSixth
+        );
         assert_eq!(
             lydian_intervals(ScaleDegree::Seventh),
-            Interval::MajorSeventh
+            SimpleInterval::MajorSeventh
         );
         assert_eq!(
             lydian_intervals(ScaleDegree::Octave),
-            Interval::PerfectOctave
+            SimpleInterval::PerfectOctave
         );
     }
 
@@ -342,35 +383,35 @@ mod tests {
     fn assert_mixolydian_intervals() {
         assert_eq!(
             mixolydian_intervals(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
         assert_eq!(
             mixolydian_intervals(ScaleDegree::Second),
-            Interval::MajorSecond
+            SimpleInterval::MajorSecond
         );
         assert_eq!(
             mixolydian_intervals(ScaleDegree::Third),
-            Interval::MajorThird
+            SimpleInterval::MajorThird
         );
         assert_eq!(
             mixolydian_intervals(ScaleDegree::Fourth),
-            Interval::PerfectFourth
+            SimpleInterval::PerfectFourth
         );
         assert_eq!(
             mixolydian_intervals(ScaleDegree::Fifth),
-            Interval::PerfectFifth
+            SimpleInterval::PerfectFifth
         );
         assert_eq!(
             mixolydian_intervals(ScaleDegree::Sixth),
-            Interval::MajorSixth
+            SimpleInterval::MajorSixth
         );
         assert_eq!(
             mixolydian_intervals(ScaleDegree::Seventh),
-            Interval::MinorSeventh
+            SimpleInterval::MinorSeventh
         );
         assert_eq!(
             mixolydian_intervals(ScaleDegree::Octave),
-            Interval::PerfectOctave
+            SimpleInterval::PerfectOctave
         );
     }
 
@@ -378,29 +419,35 @@ mod tests {
     fn assert_aeolian_intervals() {
         assert_eq!(
             aeolian_intervals(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
         assert_eq!(
             aeolian_intervals(ScaleDegree::Second),
-            Interval::MajorSecond
+            SimpleInterval::MajorSecond
         );
-        assert_eq!(aeolian_intervals(ScaleDegree::Third), Interval::MinorThird);
+        assert_eq!(
+            aeolian_intervals(ScaleDegree::Third),
+            SimpleInterval::MinorThird
+        );
         assert_eq!(
             aeolian_intervals(ScaleDegree::Fourth),
-            Interval::PerfectFourth
+            SimpleInterval::PerfectFourth
         );
         assert_eq!(
             aeolian_intervals(ScaleDegree::Fifth),
-            Interval::PerfectFifth
+            SimpleInterval::PerfectFifth
         );
-        assert_eq!(aeolian_intervals(ScaleDegree::Sixth), Interval::MinorSixth);
+        assert_eq!(
+            aeolian_intervals(ScaleDegree::Sixth),
+            SimpleInterval::MinorSixth
+        );
         assert_eq!(
             aeolian_intervals(ScaleDegree::Seventh),
-            Interval::MinorSeventh
+            SimpleInterval::MinorSeventh
         );
         assert_eq!(
             aeolian_intervals(ScaleDegree::Octave),
-            Interval::PerfectOctave
+            SimpleInterval::PerfectOctave
         );
     }
 
@@ -408,29 +455,35 @@ mod tests {
     fn assert_locrian_intervals() {
         assert_eq!(
             locrian_intervals(ScaleDegree::First),
-            Interval::PerfectUnison
+            SimpleInterval::PerfectUnison
         );
         assert_eq!(
             locrian_intervals(ScaleDegree::Second),
-            Interval::MinorSecond
+            SimpleInterval::MinorSecond
         );
-        assert_eq!(locrian_intervals(ScaleDegree::Third), Interval::MinorThird);
+        assert_eq!(
+            locrian_intervals(ScaleDegree::Third),
+            SimpleInterval::MinorThird
+        );
         assert_eq!(
             locrian_intervals(ScaleDegree::Fourth),
-            Interval::PerfectFourth
+            SimpleInterval::PerfectFourth
         );
         assert_eq!(
             locrian_intervals(ScaleDegree::Fifth),
-            Interval::DiminishedFifth
+            SimpleInterval::DiminishedFifth
         );
-        assert_eq!(locrian_intervals(ScaleDegree::Sixth), Interval::MinorSixth);
+        assert_eq!(
+            locrian_intervals(ScaleDegree::Sixth),
+            SimpleInterval::MinorSixth
+        );
         assert_eq!(
             locrian_intervals(ScaleDegree::Seventh),
-            Interval::MinorSeventh
+            SimpleInterval::MinorSeventh
         );
         assert_eq!(
             locrian_intervals(ScaleDegree::Octave),
-            Interval::PerfectOctave
+            SimpleInterval::PerfectOctave
         );
     }
 }

@@ -1,13 +1,13 @@
 use std::fmt::Display;
 
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, strum_macros::EnumIter)]
 pub enum NoteModifier {
-    Sharp,
+    DoubleFlat,
     Flat,
     #[default]
     Natural,
+    Sharp,
     DoubleSharp,
-    DoubleFlat,
     // TODO: How do we handle microtonal hoopla?
 }
 
