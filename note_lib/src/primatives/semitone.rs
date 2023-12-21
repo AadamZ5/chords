@@ -28,6 +28,6 @@ impl From<&SimpleInterval> for Semitone {
 
 impl From<Note> for Semitone {
     fn from(value: Note) -> Self {
-        value.to_semitones_from_c0() as i32
+        value.to_semitones_from_c0()
     }
 }

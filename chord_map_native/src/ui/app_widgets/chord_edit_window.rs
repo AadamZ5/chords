@@ -1,6 +1,6 @@
 use chord_map_egui::widgets::chord_edit;
 use eframe::{
-    egui::{Context, Id, Ui, Vec2, Window},
+    egui::{Context, Id, Vec2, Window},
     emath::Align2,
 };
 

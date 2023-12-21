@@ -1,17 +1,12 @@
 mod models;
 mod ui;
 
-use std::{
-    fmt::format,
-    sync::{
-        Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard, TryLockError, TryLockResult,
-    },
-};
 
-use eframe::egui::Window;
+
+
 use models::chord_map_state::ChordMapState;
-use models::chord_view_context::ChordViewContext;
-use note_lib::{Chord, Note, RawNote};
+
+
 
 fn main() -> Result<(), eframe::Error> {
     env_logger::init();
@@ -39,7 +34,7 @@ impl ChordMapApp {
 }
 
 impl eframe::App for ChordMapApp {
-    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         ui::static_ui::main_ui(ctx, &mut self.chord_map_state);
         ui::static_ui::chords_edit_windows(ctx, &mut self.chord_map_state);
         ui::static_ui::chords_display(ctx, &mut self.chord_map_state);

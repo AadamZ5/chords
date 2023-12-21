@@ -46,7 +46,7 @@ impl AbstractNote {
         };
 
         SimpleInterval::from_semitones(
-            (semitones_from_c as i32 + modifier_semitone_adjustment) as i32,
+            semitones_from_c as i32 + modifier_semitone_adjustment,
         )
         .interval
     }
@@ -288,7 +288,7 @@ pub fn bias_abstract_note_to_enharmonic_equivalent(
             }
         }
 
-        return *note;
+        *note
     } else if note.modifier > bias {
         // If our note is sharp, and we're searching for a note that's double flat,
         // (like trying to get from D# to Fbb) then we're searching for a note that's higher.
@@ -326,7 +326,7 @@ mod tests {
 
     use strum::IntoEnumIterator;
 
-    use crate::note;
+    
 
     use super::*;
 

@@ -84,7 +84,7 @@ impl SimpleIntervalFromSemitones {
 
         let mut temp_new_result = Self::new(new_interval_semitones);
 
-        temp_new_result.octave_overflow = current_octave_overflow + temp_new_result.octave_overflow;
+        temp_new_result.octave_overflow += current_octave_overflow;
 
         temp_new_result
     }

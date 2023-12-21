@@ -1,4 +1,4 @@
-use egui::{ComboBox, DragValue, Ui, Vec2, Widget, WidgetText};
+use egui::{ComboBox, DragValue, Widget, WidgetText};
 use note_lib::{Note, NoteModifier, RawNote};
 use strum::IntoEnumIterator;
 
@@ -16,18 +16,18 @@ impl RawNoteOption {
     }
 }
 
-impl Into<WidgetText> for RawNoteOption {
-    fn into(self) -> WidgetText {
+impl From<RawNoteOption> for WidgetText {
+    fn from(val: RawNoteOption) -> Self {
         WidgetText::RichText(
-            format!("{}{}", self.note.to_string(), self.modifier.to_string()).into(),
+            format!("{}{}", val.note, val.modifier).into(),
         )
     }
 }
 
-impl Into<WidgetText> for &RawNoteOption {
-    fn into(self) -> WidgetText {
+impl From<&RawNoteOption> for WidgetText {
+    fn from(val: &RawNoteOption) -> Self {
         WidgetText::RichText(
-            format!("{}{}", self.note.to_string(), self.modifier.to_string()).into(),
+            format!("{}{}", val.note, val.modifier).into(),
         )
     }
 }
@@ -61,12 +61,12 @@ pub fn chord_edit(ui: &mut egui::Ui, chord_edit_ctx: &mut ChordContext) -> Optio
                     })
                     .map(|option| {
                         let widget_text: WidgetText = (&option).into();
-                        let response = ui.selectable_value(
+                        
+                        ui.selectable_value(
                             &mut current_root_and_modifier,
                             option,
                             widget_text,
-                        );
-                        response
+                        )
                     })
                     .reduce(|a, b| a.union(b))
             });
@@ -76,14 +76,14 @@ pub fn chord_edit(ui: &mut egui::Ui, chord_edit_ctx: &mut ChordContext) -> Optio
             .clamp_range(0..=10)
             .ui(ui);
 
-        let root_or_octacve_changed = root_combo
+        
+
+        root_combo
             .inner
             .flatten()
             .map(|r| r.clicked())
             .unwrap_or(false)
-            || octave_drag_box.changed();
-
-        root_or_octacve_changed
+            || octave_drag_box.changed()
     });
 
     let commit = ui.allocate_ui(ui.available_size(), |ui| {

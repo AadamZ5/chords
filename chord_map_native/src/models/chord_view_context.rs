@@ -1,6 +1,6 @@
 use chord_map_egui::models::chord_context::ChordContext;
 use eframe::{egui::Id, epaint::Pos2};
-use note_lib::{Chord, ChordQuality, Note};
+use note_lib::{ChordQuality, Note};
 use uuid::Uuid;
 
 #[derive(Debug, Default)]
@@ -33,14 +33,14 @@ impl ChordViewContext {
     }
 }
 
-impl Into<Id> for ChordViewContext {
-    fn into(self) -> Id {
-        Id::new(self.id.to_string())
+impl From<ChordViewContext> for Id {
+    fn from(val: ChordViewContext) -> Self {
+        Id::new(val.id.to_string())
     }
 }
 
-impl Into<Id> for &ChordViewContext {
-    fn into(self) -> Id {
-        Id::new(self.id.to_string())
+impl From<&ChordViewContext> for Id {
+    fn from(val: &ChordViewContext) -> Self {
+        Id::new(val.id.to_string())
     }
 }

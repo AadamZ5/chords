@@ -255,7 +255,7 @@ impl CompoundInterval {
             // Augmented 15th is beyond 2 octaves, so the simple interval
             // is the interval within the 3rd octave.
             CompoundInterval::AugmentedFifteenth => SimpleInterval::AugmentedUnison,
-            CompoundInterval::Other(other) => other.interval_stack.last().unwrap().clone(),
+            CompoundInterval::Other(other) => *other.interval_stack.last().unwrap(),
         }
     }
 }

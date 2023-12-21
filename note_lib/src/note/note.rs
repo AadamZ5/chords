@@ -21,7 +21,7 @@ impl Note {
     }
 
     pub fn to_hertz(&self) -> Hertz {
-        self.abstract_note.raw_note.to_hertz() * 2.0f32.powi(self.octave as i32)
+        self.abstract_note.raw_note.to_hertz() * 2.0f32.powi(self.octave)
     }
 
     pub fn octave(&self) -> Octave {
@@ -43,7 +43,7 @@ impl Note {
         let SimpleIntervalFromSemitones {
             interval,
             mut octave_overflow,
-        } = SimpleInterval::from_semitones(semitones_from_low_c as i32);
+        } = SimpleInterval::from_semitones(semitones_from_low_c);
 
         let abstract_note = match interval {
             // A perfect octave interval translates to a note in the next
@@ -86,10 +86,9 @@ impl Note {
         }
 
         let semitones_before_modified = (current_octave * 12) + semitones_from_c;
-        let semitones_modified =
-            semitones_before_modified + Semitone::from(self.abstract_note.modifier);
+        
 
-        semitones_modified
+        semitones_before_modified + Semitone::from(self.abstract_note.modifier)
     }
 
     pub fn add_semitones(&self, semitones: Semitone) -> Note {

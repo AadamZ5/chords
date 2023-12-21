@@ -1,9 +1,8 @@
-use chord_map_egui::widgets::chord_edit;
+
 use eframe::{
-    egui::{Area, Context, Id, Window},
-    epaint::Pos2,
+    egui::{Context},
 };
-use note_lib::{Chord, ChordQuality, Note, NoteModifier, RawNote, C};
+use note_lib::{ChordQuality, Note, NoteModifier, C};
 
 use crate::models::{chord_map_state::ChordMapState, chord_view_context::ChordViewContext};
 
