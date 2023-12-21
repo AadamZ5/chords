@@ -21,7 +21,7 @@ impl ChordBuilder {
         self
     }
 
-    pub fn add(mut self, note: Note) -> Self {
+    pub fn add_note(mut self, note: Note) -> Self {
         self.additions.push(note);
         self
     }

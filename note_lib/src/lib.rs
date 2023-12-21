@@ -1,12 +1,12 @@
-mod chord;
-mod interval;
-mod note;
+mod chord_lib;
+mod interval_lib;
+mod note_lib;
 mod primatives;
-mod scale;
+mod scale_lib;
 
 //TODO: Should these exports preserve namespace?
-pub use chord::*;
-pub use interval::*;
-pub use note::*;
+pub use chord_lib::*;
+pub use interval_lib::*;
+pub use note_lib::*;
 pub use primatives::*;
-pub use scale::*;
+pub use scale_lib::*;

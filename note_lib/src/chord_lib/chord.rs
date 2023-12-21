@@ -32,25 +32,32 @@ impl Chord {
 
         let mut notes = self.notes.clone();
         let mut inversion = inversion;
-        if inversion > 0 {
-            // Move notes up.
-            while inversion > 0 {
-                let note = notes.remove(0);
-                // Move the note up an octave.
-                let note = Note::new(note.raw_note(), note.octave() + 1, note.modifier());
-                notes.push(note);
-                inversion -= 1
+
+        match inversion.cmp(&0) {
+            std::cmp::Ordering::Equal => {
+                // Do nothing. Leave notes as-is.
             }
-        } else if inversion < 0 {
-            // Move notes down.
-            while inversion < 0 {
-                let note = notes.remove(notes.len() - 1);
-                // Move the note down an octave.
-                let note = Note::new(note.raw_note(), note.octave() - 1, note.modifier());
-                notes.insert(0, note);
-                inversion += 1;
+            std::cmp::Ordering::Less => {
+                // Move notes down.
+                while inversion < 0 {
+                    let note = notes.remove(notes.len() - 1);
+                    // Move the note down an octave.
+                    let note = Note::new(note.raw_note(), note.octave() - 1, note.modifier());
+                    notes.insert(0, note);
+                    inversion += 1;
+                }
             }
-        }
+            std::cmp::Ordering::Greater => {
+                // Move notes up.
+                while inversion > 0 {
+                    let note = notes.remove(0);
+                    // Move the note up an octave.
+                    let note = Note::new(note.raw_note(), note.octave() + 1, note.modifier());
+                    notes.push(note);
+                    inversion -= 1
+                }
+            }
+        };
         Chord::new(notes)
     }
 }

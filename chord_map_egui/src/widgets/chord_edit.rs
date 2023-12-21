@@ -18,17 +18,13 @@ impl RawNoteOption {
 
 impl From<RawNoteOption> for WidgetText {
     fn from(val: RawNoteOption) -> Self {
-        WidgetText::RichText(
-            format!("{}{}", val.note, val.modifier).into(),
-        )
+        WidgetText::RichText(format!("{}{}", val.note, val.modifier).into())
     }
 }
 
 impl From<&RawNoteOption> for WidgetText {
     fn from(val: &RawNoteOption) -> Self {
-        WidgetText::RichText(
-            format!("{}{}", val.note, val.modifier).into(),
-        )
+        WidgetText::RichText(format!("{}{}", val.note, val.modifier).into())
     }
 }
 pub enum ChordEditAction {
@@ -48,10 +44,7 @@ pub fn chord_edit(ui: &mut egui::Ui, chord_edit_ctx: &mut ChordContext) -> Optio
             .selected_text(&current_root_and_modifier)
             .show_ui(ui, |ui| {
                 RawNote::iter()
-                    .filter(|raw_note| match raw_note {
-                        RawNote::Incongruent(_) => false,
-                        _ => true,
-                    })
+                    .filter(|raw_note| !matches!(raw_note, RawNote::Incongruent(_)))
                     .flat_map(|raw_note| {
                         [
                             RawNoteOption::new(raw_note, NoteModifier::Flat),
@@ -61,12 +54,8 @@ pub fn chord_edit(ui: &mut egui::Ui, chord_edit_ctx: &mut ChordContext) -> Optio
                     })
                     .map(|option| {
                         let widget_text: WidgetText = (&option).into();
-                        
-                        ui.selectable_value(
-                            &mut current_root_and_modifier,
-                            option,
-                            widget_text,
-                        )
+
+                        ui.selectable_value(&mut current_root_and_modifier, option, widget_text)
                     })
                     .reduce(|a, b| a.union(b))
             });
@@ -75,8 +64,6 @@ pub fn chord_edit(ui: &mut egui::Ui, chord_edit_ctx: &mut ChordContext) -> Optio
             .speed(0.05)
             .clamp_range(0..=10)
             .ui(ui);
-
-        
 
         root_combo
             .inner

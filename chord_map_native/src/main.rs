@@ -1,12 +1,7 @@
 mod models;
 mod ui;
 
-
-
-
 use models::chord_map_state::ChordMapState;
-
-
 
 fn main() -> Result<(), eframe::Error> {
     env_logger::init();
@@ -25,12 +20,6 @@ fn main() -> Result<(), eframe::Error> {
 #[derive(Debug, Default)]
 struct ChordMapApp {
     chord_map_state: ChordMapState,
-}
-
-impl ChordMapApp {
-    fn new() -> Self {
-        Self::default()
-    }
 }
 
 impl eframe::App for ChordMapApp {

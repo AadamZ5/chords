@@ -10,13 +10,13 @@ use crate::AbstractNote;
 ///
 
 #[derive(Debug, Clone, PartialEq, Default)]
-struct Scale {
+pub struct Scale {
     root_note: AbstractNote,
     mode: ScaleMode,
 }
 
 impl Scale {
-    fn new(root_note: AbstractNote, mode: ScaleMode) -> Self {
+    pub fn new(root_note: AbstractNote, mode: ScaleMode) -> Self {
         Self { root_note, mode }
     }
 }

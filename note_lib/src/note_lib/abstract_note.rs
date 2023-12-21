@@ -45,10 +45,8 @@ impl AbstractNote {
             NoteModifier::DoubleFlat => -2,
         };
 
-        SimpleInterval::from_semitones(
-            semitones_from_c as i32 + modifier_semitone_adjustment,
-        )
-        .interval
+        SimpleInterval::from_semitones(semitones_from_c as i32 + modifier_semitone_adjustment)
+            .interval
     }
 
     pub fn from_interval_from_c(
@@ -201,7 +199,7 @@ impl TryFrom<String> for AbstractNote {
     type Error = AbstractNoteParseError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        if value.len() <= 0 {
+        if value.is_empty() {
             return Err(AbstractNoteParseError::EmptyInput);
         }
 
@@ -262,62 +260,60 @@ pub fn bias_abstract_note_to_enharmonic_equivalent(
     let mut current_note = note.raw_note;
     let mut semitone_acc: Semitone = 0;
 
-    if note.modifier < bias {
-        // If our note is double flat, and we're searching for a note that's just flat,
-        // (like trying to get from Fbb to Eb) then we're searching for a note that's lower.
+    match note.modifier.cmp(&bias) {
+        std::cmp::Ordering::Equal => *note,
+        std::cmp::Ordering::Less => {
+            // If our note is double flat, and we're searching for a note that's just flat,
+            // (like trying to get from Fbb to Eb) then we're searching for a note that's lower.
 
-        let mut semitones_to_prev_with_modifier_after_existing_modifier: Semitone;
+            let mut semitones_to_prev_with_modifier_after_existing_modifier: Semitone;
 
-        loop {
-            let (prev_note, semitones_to_prev_note) = current_note.prev_note();
-            semitones_to_prev_with_modifier_after_existing_modifier = semitones_to_prev_note
-                + Into::<Semitone>::into(note.modifier)
-                - Into::<Semitone>::into(bias)
-                + semitone_acc;
+            loop {
+                let (prev_note, semitones_to_prev_note) = current_note.prev_note();
+                semitones_to_prev_with_modifier_after_existing_modifier = semitones_to_prev_note
+                    + Into::<Semitone>::into(note.modifier)
+                    - Into::<Semitone>::into(bias)
+                    + semitone_acc;
 
-            if semitones_to_prev_with_modifier_after_existing_modifier == 0 {
-                return AbstractNote {
-                    raw_note: prev_note,
-                    modifier: bias,
-                };
-            } else if semitones_to_prev_with_modifier_after_existing_modifier >= 0 {
-                break;
-            } else {
-                current_note = prev_note;
-                semitone_acc += semitones_to_prev_note;
+                if semitones_to_prev_with_modifier_after_existing_modifier == 0 {
+                    break AbstractNote {
+                        raw_note: prev_note,
+                        modifier: bias,
+                    };
+                } else if semitones_to_prev_with_modifier_after_existing_modifier >= 0 {
+                    break *note;
+                } else {
+                    current_note = prev_note;
+                    semitone_acc += semitones_to_prev_note;
+                }
             }
         }
+        std::cmp::Ordering::Greater => {
+            // If our note is sharp, and we're searching for a note that's double flat,
+            // (like trying to get from D# to Fbb) then we're searching for a note that's higher.
 
-        *note
-    } else if note.modifier > bias {
-        // If our note is sharp, and we're searching for a note that's double flat,
-        // (like trying to get from D# to Fbb) then we're searching for a note that's higher.
+            let mut semitones_to_next_with_modifier_after_existing_modifier: Semitone;
 
-        let mut semitones_to_next_with_modifier_after_existing_modifier: Semitone;
+            loop {
+                let (next_note, semitones_to_next_note) = current_note.next_note();
+                semitones_to_next_with_modifier_after_existing_modifier = semitones_to_next_note
+                    - Into::<Semitone>::into(note.modifier)
+                    + Into::<Semitone>::into(bias)
+                    - semitone_acc;
 
-        loop {
-            let (next_note, semitones_to_next_note) = current_note.next_note();
-            semitones_to_next_with_modifier_after_existing_modifier = semitones_to_next_note
-                - Into::<Semitone>::into(note.modifier)
-                + Into::<Semitone>::into(bias)
-                - semitone_acc;
-
-            if semitones_to_next_with_modifier_after_existing_modifier == 0 {
-                return AbstractNote {
-                    raw_note: next_note,
-                    modifier: bias,
-                };
-            } else if semitones_to_next_with_modifier_after_existing_modifier <= 0 {
-                break;
-            } else {
-                current_note = next_note;
-                semitone_acc += semitones_to_next_note;
+                if semitones_to_next_with_modifier_after_existing_modifier == 0 {
+                    break AbstractNote {
+                        raw_note: next_note,
+                        modifier: bias,
+                    };
+                } else if semitones_to_next_with_modifier_after_existing_modifier <= 0 {
+                    break *note;
+                } else {
+                    current_note = next_note;
+                    semitone_acc += semitones_to_next_note;
+                }
             }
         }
-
-        return *note;
-    } else {
-        return *note;
     }
 }
 
@@ -325,8 +321,6 @@ pub fn bias_abstract_note_to_enharmonic_equivalent(
 mod tests {
 
     use strum::IntoEnumIterator;
-
-    
 
     use super::*;
 
@@ -494,10 +488,7 @@ mod tests {
 
         let mut notes: Vec<AbstractNote> = Vec::new();
 
-        for note in RawNote::iter().filter(|n| match n {
-            RawNote::Incongruent(_) => false,
-            _ => true,
-        }) {
+        for note in RawNote::iter().filter(|n| !matches!(n, RawNote::Incongruent(_))) {
             for modifier in NoteModifier::iter() {
                 notes.push(AbstractNote {
                     raw_note: note,
