@@ -1,17 +1,17 @@
 use egui::{ComboBox, DragValue, Ui, Vec2, Widget, WidgetText};
-use note_lib::models::{Note, NoteModifier, RawNote};
+use note_lib::{Note, NoteModifier, RawNote};
 use strum::IntoEnumIterator;
 
 use crate::models::chord_context::ChordContext;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 struct RawNoteOption {
-    note: note_lib::models::RawNote,
-    modifier: note_lib::models::NoteModifier,
+    note: note_lib::RawNote,
+    modifier: note_lib::NoteModifier,
 }
 
 impl RawNoteOption {
-    fn new(note: note_lib::models::RawNote, modifier: note_lib::models::NoteModifier) -> Self {
+    fn new(note: note_lib::RawNote, modifier: note_lib::NoteModifier) -> Self {
         Self { note, modifier }
     }
 }

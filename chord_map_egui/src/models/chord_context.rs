@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use note_lib::models::{Chord, ChordQuality, Note};
+use note_lib::{Chord, ChordQuality, Note};
 
 #[derive(Debug, Default, Clone)]
 pub struct ChordContext {

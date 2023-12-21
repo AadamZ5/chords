@@ -3,7 +3,7 @@ use eframe::{
     egui::{Area, Context, Id, Window},
     epaint::Pos2,
 };
-use note_lib::models::{Chord, ChordQuality, Note, NoteModifier, RawNote, C};
+use note_lib::{Chord, ChordQuality, Note, NoteModifier, RawNote, C};
 
 use crate::models::{chord_map_state::ChordMapState, chord_view_context::ChordViewContext};
 

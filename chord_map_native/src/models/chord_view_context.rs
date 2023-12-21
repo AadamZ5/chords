@@ -1,6 +1,6 @@
 use chord_map_egui::models::chord_context::ChordContext;
 use eframe::{egui::Id, epaint::Pos2};
-use note_lib::models::{Chord, ChordQuality, Note};
+use note_lib::{Chord, ChordQuality, Note};
 use uuid::Uuid;
 
 #[derive(Debug, Default)]

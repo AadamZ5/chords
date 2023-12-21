@@ -1,7 +1,7 @@
 use std::fmt::format;
 
 use egui::{Grid, Response, Ui, Widget};
-use note_lib::models::Chord;
+use note_lib::Chord;
 
 use crate::models::chord_context::ChordContext;
 
