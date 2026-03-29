@@ -13,7 +13,7 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "Chord Map",
         options,
-        Box::new(|_cc| Box::<ChordMapApp>::default()),
+        Box::new(|_cc| Ok(Box::<ChordMapApp>::default())),
     )
 }
 
@@ -23,9 +23,7 @@ struct ChordMapApp {
 }
 
 impl eframe::App for ChordMapApp {
-    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
-        ui::static_ui::main_ui(ctx, &mut self.chord_map_state);
-        ui::static_ui::chords_edit_windows(ctx, &mut self.chord_map_state);
-        ui::static_ui::chords_display(ctx, &mut self.chord_map_state);
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, _frame: &mut eframe::Frame) {
+        ui::static_ui::main_ui(ui, &mut self.chord_map_state);
     }
 }

@@ -18,13 +18,13 @@ impl RawNoteOption {
 
 impl From<RawNoteOption> for WidgetText {
     fn from(val: RawNoteOption) -> Self {
-        WidgetText::RichText(format!("{}{}", val.note, val.modifier).into())
+        format!("{}{}", val.note, val.modifier).into()
     }
 }
 
 impl From<&RawNoteOption> for WidgetText {
     fn from(val: &RawNoteOption) -> Self {
-        WidgetText::RichText(format!("{}{}", val.note, val.modifier).into())
+        format!("{}{}", val.note, val.modifier).into()
     }
 }
 pub enum ChordEditAction {

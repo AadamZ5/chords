@@ -12,7 +12,7 @@ pub enum ScaleMode {
     /// P1 | M2 | M3 | P4 | P5 | M6 | M7 | P8
     #[default]
     Ionian,
-    /// Dorian is very close to the (Aeolian) natural minor scale, except the
+    /// Dorian is very close to the Aeolian natural minor scale, except the
     /// sixth note is major. https://en.wikipedia.org/wiki/Mode_(music)#Dorian_(II)
     ///
     /// Interval pattern from root:
@@ -24,26 +24,26 @@ pub enum ScaleMode {
     /// Interval pattern from root:
     /// P1 | m2 | m3 | P4 | P5 | m6 | m7 | P8
     Phrygian,
-    /// Lydian is similar to the (Ionian) major scale, except the fourth is augmented.
+    /// Lydian is similar to the Ionian major scale, except the fourth is augmented.
     /// https://en.wikipedia.org/wiki/Mode_(music)#Lydian_(IV)
     ///
     /// Interval pattern from root:
     /// P1 | M2 | M3 | A4 | P5 | M6 | M7 | P8
     Lydian,
-    /// Mixolydian is similar to the (Ionian) major scale, except the seventh is minor.
+    /// Mixolydian is similar to the Ionian major scale, except the seventh is minor.
     /// https://en.wikipedia.org/wiki/Mode_(music)#Mixolydian_(V)
     ///
     /// Interval pattern from root:
     /// P1 | M2 | M3 | P4 | P5 | M6 | m7 | P8
     Mixolydian,
-    /// Aeolian is commonly reffered to as the natural minor scale. It is similar to the
-    /// (Dorian) only the sixth is minor.
+    /// Aeolian is commonly referred to as the natural minor scale. It is similar to the
+    /// Dorian only the sixth is minor.
     /// https://en.wikipedia.org/wiki/Mode_(music)#Aeolian_(VI)
     ///
     /// Interval pattern from root:
     /// P1 | M2 | m3 | P4 | P5 | m6 | m7 | P8
     Aeolian,
-    /// Loriacn is similar to the (Phrygian) only the fifth is diminished.
+    /// Locrian is similar to the Phrygian only the fifth is diminished.
     /// https://en.wikipedia.org/wiki/Mode_(music)#Locrian_(VII)
     ///
     /// Interval pattern from root:
