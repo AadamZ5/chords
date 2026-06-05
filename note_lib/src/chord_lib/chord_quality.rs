@@ -1,5 +1,8 @@
 use super::Chord;
-use crate::{Note, SimpleInterval};
+use crate::{
+    CompoundInterval::{self},
+    Interval, Note, SimpleInterval,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub enum ChordQuality {
@@ -28,148 +31,21 @@ pub enum ChordQuality {
 }
 
 impl ChordQuality {
-    pub fn to_intervals(&self) -> Vec<SimpleInterval> {
-        todo!()
+    /// Returns an iterator of intervals to add to the root note
+    /// to form the other notes in the chord.
+    pub fn to_intervals(&self) -> impl ExactSizeIterator<Item = Interval> {
+        self.intervals_slice().iter().cloned()
     }
 
-    pub fn to_notes(&self, root: Note) -> Vec<Note> {
-        match self {
-            ChordQuality::Major => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(7);
-                vec![root, third, fifth]
-            }
-            ChordQuality::Major6th => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(7);
-                let sixth = root.add_semitones(9);
-                vec![root, third, fifth, sixth]
-            }
-            ChordQuality::Major7th => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(11);
-                vec![root, third, fifth, seventh]
-            }
-            ChordQuality::Major9th => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(11);
-                let ninth = root.add_semitones(14);
-                vec![root, third, fifth, seventh, ninth]
-            }
-            ChordQuality::Major11th => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(11);
-                let ninth = root.add_semitones(14);
-                let eleventh = root.add_semitones(17);
-                vec![root, third, fifth, seventh, ninth, eleventh]
-            }
-            ChordQuality::Major13th => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(11);
-                let ninth = root.add_semitones(14);
-                let eleventh = root.add_semitones(17);
-                let thirteenth = root.add_semitones(21);
-                vec![root, third, fifth, seventh, ninth, eleventh, thirteenth]
-            }
-            ChordQuality::Minor => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                vec![root, third, fifth]
-            }
-            ChordQuality::Minor6th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                let sixth = root.add_semitones(9);
-                vec![root, third, fifth, sixth]
-            }
-            ChordQuality::Minor7th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(10);
-                vec![root, third, fifth, seventh]
-            }
-            ChordQuality::MinorMajor7th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(11);
-                vec![root, third, fifth, seventh]
-            }
-            ChordQuality::Minor9th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(10);
-                let ninth = root.add_semitones(14);
-                vec![root, third, fifth, seventh, ninth]
-            }
-            ChordQuality::Minor11th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(10);
-                let ninth = root.add_semitones(14);
-                let eleventh = root.add_semitones(17);
-                vec![root, third, fifth, seventh, ninth, eleventh]
-            }
-            ChordQuality::Minor13th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(10);
-                let ninth = root.add_semitones(14);
-                let eleventh = root.add_semitones(17);
-                let thirteenth = root.add_semitones(21);
-                vec![root, third, fifth, seventh, ninth, eleventh, thirteenth]
-            }
-            ChordQuality::MinorMajor7thFlat13th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(7);
-                let seventh = root.add_semitones(11);
-                let thirteenth = root.add_semitones(20);
-                vec![root, third, fifth, seventh, thirteenth]
-            }
-            ChordQuality::Augmented => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(8);
-                vec![root, third, fifth]
-            }
-            ChordQuality::Augmented7th => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(8);
-                let seventh = root.add_semitones(10);
-                vec![root, third, fifth, seventh]
-            }
-            ChordQuality::AugmentedMajor7th => {
-                let third = root.add_semitones(4);
-                let fifth = root.add_semitones(8);
-                let seventh = root.add_semitones(11);
-                vec![root, third, fifth, seventh]
-            }
-            ChordQuality::Diminished => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(6);
-                vec![root, third, fifth]
-            }
-            ChordQuality::Diminished7th => {
-                let third = root.add_semitones(3);
-                let fifth = root.add_semitones(6);
-                let seventh = root.add_semitones(9);
-                vec![root, third, fifth, seventh]
-            }
-            ChordQuality::Suspended2nd => {
-                let second = root.add_semitones(2);
-                let fifth = root.add_semitones(7);
-                vec![root, second, fifth]
-            }
-            ChordQuality::Suspended4th => {
-                let fourth = root.add_semitones(5);
-                let fifth = root.add_semitones(7);
-                vec![root, fourth, fifth]
-            }
-        }
+    /// Returns an iterator of all the notes in the chord, given the root note.
+    pub fn to_notes(&self, root: Note) -> impl Iterator<Item = Note> {
+        let intervals = self.to_intervals();
+
+        // Build notes by adding intervals to the root note.
+        std::iter::once(root).chain(intervals.map(move |interval| root.add_interval(interval)))
     }
 
+    /// Returns a chord with the notes of the quality formed from the root note.
     pub fn to_chord(&self, root: Note) -> Chord {
         Chord::new(self.to_notes(root))
     }
@@ -223,6 +99,112 @@ impl ChordQuality {
             ChordQuality::Diminished7th => "Diminished 7th",
             ChordQuality::Suspended2nd => "Suspended 2nd",
             ChordQuality::Suspended4th => "Suspended 4th",
+        }
+    }
+}
+
+// Private impl
+impl ChordQuality {
+    /// Returns the intervals to add to the root note to get the other notes in the chord.
+    const fn intervals_slice(&self) -> &'static [Interval] {
+        use CompoundInterval::*;
+        use Interval::*;
+        use SimpleInterval::*;
+
+        // I like to refer to this wiki page:
+        // https://en.wikipedia.org/wiki/Interval_(music)#Compound_intervals
+
+        match self {
+            ChordQuality::Major => &[Simple(MajorThird), Simple(PerfectFifth)],
+            ChordQuality::Major6th => {
+                &[Simple(MajorThird), Simple(PerfectFifth), Simple(MajorSixth)]
+            }
+            ChordQuality::Major7th => &[
+                Simple(MajorThird),
+                Simple(PerfectFifth),
+                Simple(MajorSeventh),
+            ],
+            ChordQuality::Major9th => &[
+                Simple(MajorThird),
+                Simple(PerfectFifth),
+                Simple(MajorSeventh),
+                Compound(MajorNinth),
+            ],
+            ChordQuality::Major11th => &[
+                Simple(MajorThird),
+                Simple(PerfectFifth),
+                Simple(MajorSeventh),
+                Compound(MajorNinth),
+                Compound(PerfectEleventh),
+            ],
+            ChordQuality::Major13th => &[
+                Simple(MajorThird),
+                Simple(PerfectFifth),
+                Simple(MajorSeventh),
+                Compound(MajorNinth),
+                Compound(PerfectEleventh),
+                Compound(MajorThirteenth),
+            ],
+            ChordQuality::Minor => &[Simple(MinorThird), Simple(PerfectFifth)],
+            ChordQuality::Minor6th => {
+                &[Simple(MinorThird), Simple(PerfectFifth), Simple(MinorSixth)]
+            }
+            ChordQuality::Minor7th => &[
+                Simple(MinorThird),
+                Simple(PerfectFifth),
+                Simple(MinorSeventh),
+            ],
+            ChordQuality::MinorMajor7th => &[
+                Simple(MinorThird),
+                Simple(PerfectFifth),
+                Simple(MajorSeventh),
+            ],
+            ChordQuality::Minor9th => &[
+                Simple(MinorThird),
+                Simple(PerfectFifth),
+                Simple(MinorSeventh),
+                Compound(MajorNinth),
+            ],
+            ChordQuality::Minor11th => &[
+                Simple(MinorThird),
+                Simple(PerfectFifth),
+                Simple(MinorSeventh),
+                Compound(MajorNinth),
+                Compound(PerfectEleventh),
+            ],
+            ChordQuality::Minor13th => &[
+                Simple(MinorThird),
+                Simple(PerfectFifth),
+                Simple(MinorSeventh),
+                Compound(MajorNinth),
+                Compound(PerfectEleventh),
+                Compound(MajorThirteenth),
+            ],
+            ChordQuality::MinorMajor7thFlat13th => &[
+                Simple(MinorThird),
+                Simple(PerfectFifth),
+                Simple(MajorSeventh),
+                Compound(MajorThirteenth),
+            ],
+            ChordQuality::Augmented => &[Simple(MajorThird), Simple(AugmentedFifth)],
+            ChordQuality::Augmented7th => &[
+                Simple(MajorThird),
+                Simple(AugmentedFifth),
+                Simple(MinorSeventh),
+            ],
+            ChordQuality::AugmentedMajor7th => &[
+                Simple(MajorThird),
+                Simple(AugmentedFifth),
+                Simple(MajorSeventh),
+            ],
+            ChordQuality::Diminished => &[Simple(MinorThird), Simple(DiminishedFifth)],
+            ChordQuality::Diminished7th => &[
+                Simple(MinorThird),
+                Simple(DiminishedFifth),
+                Simple(DiminishedSeventh),
+            ],
+            ChordQuality::Suspended2nd => &[Simple(MajorSecond), Simple(PerfectFifth)],
+            ChordQuality::Suspended4th => &[Simple(PerfectFourth), Simple(PerfectFifth)],
         }
     }
 }

@@ -17,6 +17,13 @@ impl Interval {
             Interval::Compound(CompoundInterval::from_semitones(semitones))
         }
     }
+
+    pub fn semitones(&self) -> Semitone {
+        match self {
+            Interval::Simple(simple_interval) => simple_interval.semitones(),
+            Interval::Compound(compound_interval) => compound_interval.semitones(),
+        }
+    }
 }
 
 impl Display for Interval {

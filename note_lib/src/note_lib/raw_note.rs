@@ -5,6 +5,7 @@ use strum_macros::EnumIter;
 use super::{AbstractNote, NoteModifier};
 use crate::{Hertz, Semitone};
 
+/// A note without an octave or modifier. This is the most basic representation of a note.
 #[derive(PartialEq, Clone, Copy, Debug, Default, EnumIter)]
 pub enum RawNote {
     /// A note that does not fit on the largely used 12-tone scale.
@@ -20,6 +21,7 @@ pub enum RawNote {
 }
 
 impl RawNote {
+    /// Returns the next note in the abstract note scale, along with the number of semitones to get there.
     pub fn next_note(&self) -> (RawNote, Semitone) {
         match self {
             RawNote::C => (RawNote::D, 2),
@@ -33,6 +35,7 @@ impl RawNote {
         }
     }
 
+    /// Returns the previous note in the abstract note scale, along with the number of semitones to get there.
     pub fn prev_note(&self) -> (RawNote, Semitone) {
         match self {
             RawNote::C => (RawNote::B, 1),
@@ -46,6 +49,11 @@ impl RawNote {
         }
     }
 
+    /// Converts a raw note to its corresponding frequency in Hertz.
+    ///
+    /// You should be able to multiply these by octaves to get the frequency of any note. For example, A4 is 440 Hz, and A3 is 220 Hz.
+    /// A [RawNote::A] without any octave is A0, which is 27.5 Hz. Multiplying by 2 for each octave should yeild you the correct frequency
+    /// for any note if you need it.
     pub fn raw_note_to_hz(raw_note: RawNote) -> Hertz {
         // I referenced https://pages.mtu.edu/~suits/notefreqs.html for the frequencies.
 
@@ -62,6 +70,8 @@ impl RawNote {
         }
     }
 
+    /// Converts this raw note to it's corresponding frequency in Hertz at the lowest known pitch (the Zero octave).
+    /// Ex, if you convert a [RawNote::A] to hertz, you get 27.5 Hz, which is A0.
     pub fn to_hertz(&self) -> Hertz {
         RawNote::raw_note_to_hz(*self)
     }

@@ -1,8 +1,11 @@
 use super::{AbstractNote, ModifierPreference, NoteModifier, RawNote};
-use crate::{Chord, Hertz, Octave, Semitone, SimpleInterval, SimpleIntervalFromSemitones};
+use crate::{
+    Chord, CompoundInterval, Hertz, Interval, Octave, Semitone, SimpleInterval,
+    SimpleIntervalFromSemitones,
+};
 use std::{
     fmt::{Display, Formatter},
-    ops::Add,
+    ops::{Add, Sub},
     vec,
 };
 
@@ -21,6 +24,7 @@ impl Note {
     }
 
     pub fn to_hertz(&self) -> Hertz {
+        // TODO: Modifiers are not accounted for here. We should probably convert semitones to hertz?
         self.abstract_note.raw_note.to_hertz() * 2.0f32.powi(self.octave)
     }
 
@@ -86,7 +90,6 @@ impl Note {
         }
 
         let semitones_before_modified = (current_octave * 12) + semitones_from_c;
-        
 
         semitones_before_modified + Semitone::from(self.abstract_note.modifier)
     }
@@ -99,6 +102,20 @@ impl Note {
         };
 
         Note::from_semitones_from_c0(new_semitones, self.abstract_note.modifier.into())
+    }
+
+    pub fn add_interval<T>(&self, interval: T) -> Note
+    where
+        T: Into<Interval>,
+    {
+        self.add_semitones(interval.into().semitones())
+    }
+
+    pub fn sub_interval<T>(&self, interval: T) -> Note
+    where
+        T: Into<Interval>,
+    {
+        self.add_semitones(-interval.into().semitones())
     }
 }
 
@@ -113,6 +130,54 @@ impl Add for Note {
 
     fn add(self, rhs: Self) -> Self::Output {
         Chord::new(vec![self, rhs])
+    }
+}
+
+impl Add<SimpleInterval> for Note {
+    type Output = Note;
+
+    fn add(self, rhs: SimpleInterval) -> Self::Output {
+        self.add_interval(rhs)
+    }
+}
+
+impl Sub<SimpleInterval> for Note {
+    type Output = Note;
+
+    fn sub(self, rhs: SimpleInterval) -> Self::Output {
+        self.sub_interval(rhs)
+    }
+}
+
+impl Add<CompoundInterval> for Note {
+    type Output = Note;
+
+    fn add(self, rhs: CompoundInterval) -> Self::Output {
+        self.add_interval(rhs)
+    }
+}
+
+impl Sub<CompoundInterval> for Note {
+    type Output = Note;
+
+    fn sub(self, rhs: CompoundInterval) -> Self::Output {
+        self.sub_interval(rhs)
+    }
+}
+
+impl Add<Interval> for Note {
+    type Output = Note;
+
+    fn add(self, rhs: Interval) -> Self::Output {
+        self.add_interval(rhs)
+    }
+}
+
+impl Sub<Interval> for Note {
+    type Output = Note;
+
+    fn sub(self, rhs: Interval) -> Self::Output {
+        self.sub_interval(rhs)
     }
 }
 
