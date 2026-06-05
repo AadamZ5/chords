@@ -10,7 +10,7 @@ pub const CHORD_EDIT_WINDOW_SIZE: Vec2 = Vec2::new(300.0, 300.0);
 
 pub fn chord_edit_window(ctx: &Context, chord_view: &mut ChordViewContext) {
     let chord_id = chord_view.id().to_string();
-    let window_id: Id = Into::<Id>::into(chord_id.clone()).with("edit");
+    let window_id: Id = Into::<Id>::into(chord_id).with("edit");
 
     let actual_chord_context = &mut chord_view.chord_context;
     let editing_chord_context_opt = &mut chord_view.editing_chord_context;

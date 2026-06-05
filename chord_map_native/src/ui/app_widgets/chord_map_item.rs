@@ -31,7 +31,7 @@ pub fn chord_map_item(ui: &mut Ui, chord_ctx: &mut ChordViewContext) {
                 .layout(Layout::top_down(Align::Min))
                 .max_rect(place_content_rect),
         )
-        .add(|ui: &mut Ui| {
+        .push_id(chord_id, |ui: &mut Ui| {
             let frame_response = frame.show(ui, |ui| {
                 ui.vertical(|ui| {
                     ui.label(format!("Coords: {}", chord_ctx.map_pos));
@@ -45,8 +45,9 @@ pub fn chord_map_item(ui: &mut Ui, chord_ctx: &mut ChordViewContext) {
                 })
             });
 
-            ui.interact(frame_response.response.rect, area_id, Sense::drag())
-        });
+            ui.interact(frame_response.response.rect, area_id, Sense::all())
+        })
+        .inner;
 
     if drag_response.dragged() {
         chord_ctx.map_pos += drag_response.drag_delta();
