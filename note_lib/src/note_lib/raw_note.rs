@@ -3,7 +3,7 @@ use std::{fmt::Display, ops::Add};
 use strum_macros::EnumIter;
 
 use super::{AbstractNote, NoteModifier};
-use crate::{Hertz, Semitone};
+use crate::{try_from_string_prefix::TryFromStringPrefix, Hertz, Semitone};
 
 /// A note without an octave or modifier. This is the most basic representation of a note.
 #[derive(PartialEq, Clone, Copy, Debug, Default, EnumIter)]
@@ -102,6 +102,7 @@ impl Display for RawNote {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IntoRawNoteError {
     InvalidNoteChar(char),
 }
@@ -124,6 +125,20 @@ impl TryFrom<char> for RawNote {
             'B' => Ok(RawNote::B),
             _ => Err(IntoRawNoteError::InvalidNoteChar(value)),
         }
+    }
+}
+
+impl TryFromStringPrefix for RawNote {
+    type Error = IntoRawNoteError;
+
+    fn try_from_string_prefix(value: &str) -> Result<(Self, &str), Self::Error> {
+        let mut chars = value.chars();
+        let first_char = chars
+            .next()
+            .ok_or(IntoRawNoteError::InvalidNoteChar('\0'))?;
+        let raw_note = RawNote::try_from(first_char)?;
+        let remaining_string = chars.as_str();
+        Ok((raw_note, remaining_string))
     }
 }
 

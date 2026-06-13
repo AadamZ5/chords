@@ -1,6 +1,7 @@
 use super::{AbstractNote, ModifierPreference, NoteModifier, RawNote};
 use crate::{
-    Chord, CompoundInterval, Hertz, Interval, Octave, Semitone, SimpleInterval,
+    try_from_string_prefix::TryFromStringPrefix, Chord, CompoundInterval, Hertz, Interval,
+    IntoModifierError, IntoOctaveError, IntoRawNoteError, Octave, Semitone, SimpleInterval,
     SimpleIntervalFromSemitones,
 };
 use std::{
@@ -122,6 +123,62 @@ impl Note {
 impl Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Formatter::write_fmt(f, format_args!("{}{}", self.abstract_note, self.octave))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IntoNoteError {
+    EmptyNoteString,
+    InvalidNoteString(String),
+    RawNoteParseError(IntoRawNoteError),
+    NoteModifierParseError(IntoModifierError),
+    OctaveParseError(IntoOctaveError),
+}
+
+impl TryFrom<&str> for Note {
+    type Error = IntoNoteError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::try_from_string_prefix(value).and_then(|(note, remaining)| {
+            if remaining.is_empty() {
+                Ok(note)
+            } else {
+                Err(IntoNoteError::InvalidNoteString(value.to_string()))
+            }
+        })
+    }
+}
+
+impl TryFromStringPrefix for Note {
+    type Error = IntoNoteError;
+
+    fn try_from_string_prefix(value: &str) -> Result<(Self, &str), Self::Error> {
+        let (raw_note, remaining) = RawNote::try_from_string_prefix(value)
+            .map_err(|e| IntoNoteError::RawNoteParseError(e))?;
+
+        // Since the modifier is optional, we only want to throw the modifier error if we can't successfully
+        // also parse an octave.
+        let modifier_result = NoteModifier::try_from_string_prefix(remaining)
+            .map_err(|e| IntoNoteError::NoteModifierParseError(e));
+
+        let (modifier, octave, remaining) = if let Ok((modifier, remaining)) = modifier_result {
+            let (octave, remaining) = Octave::try_from_string_prefix(remaining)
+                .map_err(|e| IntoNoteError::OctaveParseError(e))?;
+            (modifier, octave, remaining)
+        } else {
+            // If we can't parse a modifier, see if we can further parse the octave. If we can parse an octave but not a modifier, that is ok.
+            let octave_result = Octave::try_from_string_prefix(remaining)
+                .map_err(|e| IntoNoteError::OctaveParseError(e));
+
+            if let Ok((octave, remaining)) = octave_result {
+                (NoteModifier::Natural, octave, remaining)
+            } else {
+                return Err(modifier_result.unwrap_err());
+            }
+        };
+
+        let note = Note::new(raw_note, octave, modifier);
+        Ok((note, remaining))
     }
 }
 

@@ -3,7 +3,7 @@ use std::{
     ops::{Add, Sub},
 };
 
-use crate::{Semitone, SimpleInterval};
+use crate::{try_from_string_prefix::TryFromStringPrefix, Semitone, SimpleInterval};
 
 use super::{ModifierPreference, Note, NoteModifier, RawNote};
 
@@ -239,7 +239,27 @@ impl TryFrom<&str> for AbstractNote {
     type Error = AbstractNoteParseError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Self::try_from(value.to_string())
+        if value.is_empty() {
+            return Err(AbstractNoteParseError::EmptyInput);
+        }
+
+        let trimmed = value.trim();
+        // The trimmed value shouldn't be more than 3 characters.
+        // (like "C##")
+        if trimmed.len() > 3 {
+            return Err(AbstractNoteParseError::InputTooLong);
+        }
+
+        let (raw_note, remaining) = RawNote::try_from_string_prefix(trimmed)
+            .map_err(|_| AbstractNoteParseError::InvalidNote)?;
+        let (modifier, remaining) = NoteModifier::try_from_string_prefix(remaining)
+            .map_err(|_| AbstractNoteParseError::InvalidModifier)?;
+
+        if !remaining.is_empty() {
+            return Err(AbstractNoteParseError::InputTooLong);
+        }
+
+        Ok(Self { raw_note, modifier })
     }
 }
 

@@ -34,7 +34,7 @@ impl ChordQuality {
     /// Returns an iterator of intervals to add to the root note
     /// to form the other notes in the chord.
     pub fn to_intervals(&self) -> impl ExactSizeIterator<Item = Interval> {
-        self.intervals_slice().iter().cloned()
+        self.root_additions_slice().iter().cloned()
     }
 
     /// Returns an iterator of all the notes in the chord, given the root note.
@@ -106,7 +106,7 @@ impl ChordQuality {
 // Private impl
 impl ChordQuality {
     /// Returns the intervals to add to the root note to get the other notes in the chord.
-    const fn intervals_slice(&self) -> &'static [Interval] {
+    const fn root_additions_slice(&self) -> &'static [Interval] {
         use CompoundInterval::*;
         use Interval::*;
         use SimpleInterval::*;
