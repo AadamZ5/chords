@@ -3,7 +3,11 @@ use std::{
     ops::{Add, Sub},
 };
 
-use crate::{try_from_string_prefix::TryFromStringPrefix, Semitone, SimpleInterval};
+use thiserror::Error;
+
+use crate::{
+    try_from_string_prefix::TryFromStringPrefix, IntoModifierError, Semitone, SimpleInterval,
+};
 
 use super::{ModifierPreference, Note, NoteModifier, RawNote};
 
@@ -187,11 +191,15 @@ impl From<(NoteModifier, RawNote)> for AbstractNote {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Error)]
 pub enum AbstractNoteParseError {
+    #[error("Cannot parse empty string as an abstract note.")]
     EmptyInput,
-    InvalidNote,
-    InvalidModifier,
+    #[error("Invalid note format: {0}")]
+    InvalidNote(String),
+    #[error("Invalid note modifier: {0}")]
+    InvalidModifier(String),
+    #[error("Input too long")]
     InputTooLong,
 }
 
@@ -199,39 +207,7 @@ impl TryFrom<String> for AbstractNote {
     type Error = AbstractNoteParseError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(AbstractNoteParseError::EmptyInput);
-        }
-
-        let trimmed = value.trim();
-        // The trimmed value shouldn't be more than 3 characters.
-        if trimmed.len() > 3 {
-            return Err(AbstractNoteParseError::InputTooLong);
-        }
-
-        let (first, rest) = trimmed.split_at(1);
-
-        let raw_note = match first.to_ascii_uppercase().as_str() {
-            "A" => RawNote::A,
-            "B" => RawNote::B,
-            "C" => RawNote::C,
-            "D" => RawNote::D,
-            "E" => RawNote::E,
-            "F" => RawNote::F,
-            "G" => RawNote::G,
-            _ => return Err(AbstractNoteParseError::InvalidNote),
-        };
-
-        let modifier = match rest {
-            "" => NoteModifier::Natural,
-            "#" => NoteModifier::Sharp,
-            "b" => NoteModifier::Flat,
-            "##" | "x" => NoteModifier::DoubleSharp,
-            "bb" => NoteModifier::DoubleFlat,
-            _ => return Err(AbstractNoteParseError::InvalidModifier),
-        };
-
-        Ok(Self { raw_note, modifier })
+        Self::try_from(value.as_str())
     }
 }
 
@@ -251,9 +227,16 @@ impl TryFrom<&str> for AbstractNote {
         }
 
         let (raw_note, remaining) = RawNote::try_from_string_prefix(trimmed)
-            .map_err(|_| AbstractNoteParseError::InvalidNote)?;
-        let (modifier, remaining) = NoteModifier::try_from_string_prefix(remaining)
-            .map_err(|_| AbstractNoteParseError::InvalidModifier)?;
+            .map_err(|_| AbstractNoteParseError::InvalidNote(trimmed.to_string()))?;
+        let (modifier, remaining) = match NoteModifier::try_from_string_prefix(remaining) {
+            Ok(result) => result,
+            Err(e) => match e {
+                IntoModifierError::EmptyInput => (NoteModifier::Natural, remaining),
+                IntoModifierError::UnknownModifier(e) => {
+                    return Err(AbstractNoteParseError::InvalidModifier(e))
+                }
+            },
+        };
 
         if !remaining.is_empty() {
             return Err(AbstractNoteParseError::InputTooLong);

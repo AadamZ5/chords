@@ -31,6 +31,8 @@ impl Display for NoteModifier {
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum IntoModifierError {
+    #[error("Cannot parse empty string as a note modifier.")]
+    EmptyInput,
     #[error("Unknown note modifier: {0}")]
     UnknownModifier(String),
 }
@@ -53,6 +55,10 @@ impl TryFromStringPrefix for NoteModifier {
     type Error = IntoModifierError;
 
     fn try_from_string_prefix(value: &str) -> Result<(Self, &str), Self::Error> {
+        if value.is_empty() {
+            return Err(IntoModifierError::EmptyInput);
+        }
+
         let modifier = if value.starts_with("##") {
             NoteModifier::DoubleSharp
         } else if value.starts_with("bb") {
