@@ -1,3 +1,5 @@
+use crate::try_from_string_prefix::TryFromStringPrefix;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, strum_macros::EnumIter)]
 pub enum IntervalQuality {
     Perfect,
@@ -71,5 +73,46 @@ impl PartialOrd for IntervalQuality {
                 IntervalQuality::Augmented => Some(std::cmp::Ordering::Less),
             },
         }
+    }
+}
+
+#[derive(Debug, Clone, thiserror::Error, PartialEq, Eq)]
+pub enum IntoIntervalQualityError {
+    #[error("Unknown interval quality: {0}")]
+    UnknownIntervalQuality(String),
+}
+
+impl TryFromStringPrefix for IntervalQuality {
+    type Error = IntoIntervalQualityError;
+
+    fn try_from_string_prefix(value: &str) -> Result<(Self, &str), Self::Error> {
+        let quality = if value.starts_with("Perfect") {
+            IntervalQuality::Perfect
+        } else if value.starts_with("Major") {
+            IntervalQuality::Major
+        } else if value.starts_with("Minor") {
+            IntervalQuality::Minor
+        } else if value.starts_with("Augmented") {
+            IntervalQuality::Augmented
+        } else if value.starts_with("Diminished") {
+            IntervalQuality::Diminished
+        } else if value.starts_with('P') {
+            IntervalQuality::Perfect
+        } else if value.starts_with('M') {
+            IntervalQuality::Major
+        } else if value.starts_with('m') {
+            IntervalQuality::Minor
+        } else if value.starts_with('A') {
+            IntervalQuality::Augmented
+        } else if value.starts_with('d') {
+            IntervalQuality::Diminished
+        } else {
+            return Err(IntoIntervalQualityError::UnknownIntervalQuality(
+                value.to_string(),
+            ));
+        };
+
+        let remaining = &value[quality.to_string().len()..];
+        Ok((quality, remaining))
     }
 }

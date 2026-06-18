@@ -1,4 +1,4 @@
-use crate::{Note, NoteModifier, SimpleInterval};
+use crate::{CompoundInterval, Interval, Note, NoteModifier, SimpleInterval};
 
 pub type Semitone = i32;
 
@@ -22,6 +22,30 @@ impl From<SimpleInterval> for Semitone {
 
 impl From<&SimpleInterval> for Semitone {
     fn from(value: &SimpleInterval) -> Self {
+        value.semitones()
+    }
+}
+
+impl From<CompoundInterval> for Semitone {
+    fn from(value: CompoundInterval) -> Self {
+        value.semitones()
+    }
+}
+
+impl From<&CompoundInterval> for Semitone {
+    fn from(value: &CompoundInterval) -> Self {
+        value.semitones()
+    }
+}
+
+impl From<Interval> for Semitone {
+    fn from(value: Interval) -> Self {
+        value.semitones()
+    }
+}
+
+impl From<&Interval> for Semitone {
+    fn from(value: &Interval) -> Self {
         value.semitones()
     }
 }

@@ -1,3 +1,5 @@
+use thiserror::Error;
+
 use super::{AbstractNote, ModifierPreference, NoteModifier, RawNote};
 use crate::{
     try_from_string_prefix::TryFromStringPrefix, Chord, CompoundInterval, Hertz, Interval,
@@ -126,12 +128,17 @@ impl Display for Note {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum IntoNoteError {
+    #[error("Cannot parse empty string as a note.")]
     EmptyNoteString,
+    #[error("Invalid note string: {0}")]
     InvalidNoteString(String),
+    #[error("Invalid pitch: {0}")]
     RawNoteParseError(IntoRawNoteError),
+    #[error("Invalid note modifier: {0}")]
     NoteModifierParseError(IntoModifierError),
+    #[error("Invalid octave: {0}")]
     OctaveParseError(IntoOctaveError),
 }
 

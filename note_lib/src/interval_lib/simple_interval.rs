@@ -1,7 +1,14 @@
 use std::ops::{Add, Sub};
 
-use crate::{IntervalQuality, Semitone, SimpleIntervalFromSemitones};
+use crate::{
+    try_from_string_prefix::TryFromStringPrefix, IntervalQuality, OtherCompoundInterval, Semitone,
+    SimpleIntervalFromSemitones,
+};
 
+/// Simple interval numbers represent the "rank" of the interval. For example,
+/// a minor third and a major third both have an interval number of "third". The
+/// interval number is used in conjunction with the interval quality to determine
+/// the specific interval. For example, a minor third is a third with a minor quality.
 #[derive(
     Debug,
     Clone,
@@ -22,6 +29,64 @@ pub enum SimpleIntervalNumber {
     Sixth,
     Seventh,
     Octave,
+}
+
+pub enum IntoSimpleIntervalNumberError<T> {
+    NoMatch(T),
+}
+
+impl TryFrom<u8> for SimpleIntervalNumber {
+    type Error = IntoSimpleIntervalNumberError<u8>;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        let interval = match value {
+            1 => SimpleIntervalNumber::Unison,
+            2 => SimpleIntervalNumber::Second,
+            3 => SimpleIntervalNumber::Third,
+            4 => SimpleIntervalNumber::Fourth,
+            5 => SimpleIntervalNumber::Fifth,
+            6 => SimpleIntervalNumber::Sixth,
+            7 => SimpleIntervalNumber::Seventh,
+            8 => SimpleIntervalNumber::Octave,
+            _ => return Err(IntoSimpleIntervalNumberError::NoMatch(value)),
+        };
+
+        Ok(interval)
+    }
+}
+
+impl Into<u8> for SimpleIntervalNumber {
+    fn into(self) -> u8 {
+        self as u8
+    }
+}
+
+/// If the [OtherCompoundInterval] is just composed of one simple interval (when simplified),
+/// then extract that simple interval.
+impl TryFrom<OtherCompoundInterval> for SimpleInterval {
+    type Error = ();
+
+    fn try_from(compound_interval: OtherCompoundInterval) -> Result<Self, Self::Error> {
+        let simplified = compound_interval.simplify();
+        if simplified.stack().len() == 1 {
+            Ok(simplified.stack()[0])
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<&OtherCompoundInterval> for SimpleInterval {
+    type Error = ();
+
+    fn try_from(compound_interval: &OtherCompoundInterval) -> Result<Self, Self::Error> {
+        let simplified = compound_interval.simplify();
+        if simplified.stack().len() == 1 {
+            Ok(simplified.stack()[0])
+        } else {
+            Err(())
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -299,7 +364,7 @@ impl SimpleInterval {
     }
 
     /// Returns the interval quality of this interval. For example, a
-    /// [`Interval::MinorThird`] has an interval quality of [`IntervalQuality::Minor`].
+    /// [`SimpleInterval::MinorThird`] has an interval quality of [`IntervalQuality::Minor`].
     ///
     /// ```rust
     /// use note_lib::{SimpleInterval, IntervalQuality};
@@ -337,7 +402,7 @@ impl SimpleInterval {
     }
 
     /// Returns the inverse of this interval. For example, the inverse of a
-    /// [`Interval::MinorThird`] is a [`Interval::MajorSixth`].
+    /// [`SimpleInterval::MinorThird`] is a [`SimpleInterval::MajorSixth`].
     /// https://en.wikipedia.org/wiki/Interval_(music)#Inversion
     ///
     /// ```rust
@@ -414,13 +479,68 @@ impl SimpleInterval {
     pub fn add_semitones(&self, semitones: Semitone) -> SimpleIntervalFromSemitones {
         SimpleIntervalFromSemitones::new(self.semitones()).add_semitones(semitones)
     }
+
+    /// Given an input interval, will match to an enharmonically equivalent interval
+    /// of the given `bias_quality` if one exists. If no enharmonically equivalent
+    /// interval exists, or if the input interval is already of the given
+    /// `bias_quality`, the input interval is returned.
+    pub fn bias_interval_quality(&self, bias_quality: IntervalQuality) -> SimpleInterval {
+        // Early return if the quality is already the bias.
+        if self.quality() == bias_quality {
+            return *self;
+        }
+
+        match bias_quality {
+            IntervalQuality::Perfect => match self {
+                SimpleInterval::DiminishedSecond => SimpleInterval::PerfectUnison,
+                SimpleInterval::AugmentedThird => SimpleInterval::PerfectFourth,
+                SimpleInterval::DiminishedSixth => SimpleInterval::PerfectFifth,
+                SimpleInterval::AugmentedSeventh => SimpleInterval::PerfectOctave,
+                _ => *self,
+            },
+            IntervalQuality::Major => match self {
+                SimpleInterval::DiminishedThird => SimpleInterval::MinorSecond,
+                SimpleInterval::DiminishedFourth => SimpleInterval::MajorThird,
+                SimpleInterval::DiminishedSeventh => SimpleInterval::MajorSixth,
+                SimpleInterval::DiminishedOctave => SimpleInterval::MajorSeventh,
+                _ => *self,
+            },
+            IntervalQuality::Minor => match self {
+                SimpleInterval::AugmentedUnison => SimpleInterval::MinorSecond,
+                SimpleInterval::AugmentedSecond => SimpleInterval::MinorThird,
+                SimpleInterval::AugmentedFifth => SimpleInterval::MinorSixth,
+                SimpleInterval::AugmentedSixth => SimpleInterval::MinorSeventh,
+                _ => *self,
+            },
+            IntervalQuality::Augmented => match self {
+                SimpleInterval::MinorSecond => SimpleInterval::AugmentedUnison,
+                SimpleInterval::MinorThird => SimpleInterval::AugmentedSecond,
+                SimpleInterval::PerfectFourth => SimpleInterval::AugmentedThird,
+                SimpleInterval::MinorSixth => SimpleInterval::AugmentedFifth,
+                SimpleInterval::MinorSeventh => SimpleInterval::AugmentedSixth,
+                SimpleInterval::PerfectOctave => SimpleInterval::AugmentedSeventh,
+                _ => *self,
+            },
+            IntervalQuality::Diminished => match self {
+                SimpleInterval::PerfectUnison => SimpleInterval::DiminishedSecond,
+                SimpleInterval::MajorSecond => SimpleInterval::DiminishedThird,
+                SimpleInterval::MajorThird => SimpleInterval::DiminishedFourth,
+                SimpleInterval::PerfectFifth => SimpleInterval::DiminishedSixth,
+                SimpleInterval::MajorSixth => SimpleInterval::DiminishedSeventh,
+                SimpleInterval::MajorSeventh => SimpleInterval::DiminishedOctave,
+                _ => *self,
+            },
+        }
+    }
 }
 
 impl Add<Semitone> for SimpleInterval {
     type Output = SimpleInterval;
 
     fn add(self, rhs: Semitone) -> Self::Output {
-        bias_simple_interval_quality(self.add_semitones(rhs).interval, self.quality())
+        self.add_semitones(rhs)
+            .interval
+            .bias_interval_quality(self.quality())
     }
 }
 
@@ -428,7 +548,9 @@ impl Add<SimpleInterval> for SimpleInterval {
     type Output = SimpleInterval;
 
     fn add(self, rhs: SimpleInterval) -> Self::Output {
-        bias_simple_interval_quality(self.add_semitones(rhs.semitones()).interval, self.quality())
+        self.add_semitones(rhs.semitones())
+            .interval
+            .bias_interval_quality(self.quality())
     }
 }
 
@@ -436,7 +558,9 @@ impl Sub<Semitone> for SimpleInterval {
     type Output = SimpleInterval;
 
     fn sub(self, rhs: Semitone) -> Self::Output {
-        bias_simple_interval_quality(self.add_semitones(-rhs).interval, self.quality())
+        self.add_semitones(-rhs)
+            .interval
+            .bias_interval_quality(self.quality())
     }
 }
 
@@ -444,10 +568,9 @@ impl Sub<SimpleInterval> for SimpleInterval {
     type Output = SimpleInterval;
 
     fn sub(self, rhs: SimpleInterval) -> Self::Output {
-        bias_simple_interval_quality(
-            self.add_semitones(-rhs.semitones()).interval,
-            self.quality(),
-        )
+        self.add_semitones(-rhs.semitones())
+            .interval
+            .bias_interval_quality(self.quality())
     }
 }
 
@@ -517,59 +640,79 @@ impl std::fmt::Display for SimpleInterval {
     }
 }
 
-/// Given an input interval, will match to an enharmonically equivalent interval
-/// of the given `bias_quality` if one exists. If no enharmonically equivalent
-/// interval exists, or if the input interval is already of the given
-/// `bias_quality`, the input interval is returned.
-pub fn bias_simple_interval_quality(
-    input_interval: SimpleInterval,
-    bias_quality: IntervalQuality,
-) -> SimpleInterval {
-    // Early return if the quality is already the bias.
-    if input_interval.quality() == bias_quality {
-        return input_interval;
-    }
+#[derive(Debug, Clone, thiserror::Error, PartialEq, Eq)]
+pub enum IntoSimpleIntervalError {
+    #[error("No matching simple interval for string: {0}")]
+    NoMatchingInterval(String),
+}
 
-    match bias_quality {
-        IntervalQuality::Perfect => match input_interval {
-            SimpleInterval::DiminishedSecond => SimpleInterval::PerfectUnison,
-            SimpleInterval::AugmentedThird => SimpleInterval::PerfectFourth,
-            SimpleInterval::DiminishedSixth => SimpleInterval::PerfectFifth,
-            SimpleInterval::AugmentedSeventh => SimpleInterval::PerfectOctave,
-            _ => input_interval,
-        },
-        IntervalQuality::Major => match input_interval {
-            SimpleInterval::DiminishedThird => SimpleInterval::MinorSecond,
-            SimpleInterval::DiminishedFourth => SimpleInterval::MajorThird,
-            SimpleInterval::DiminishedSeventh => SimpleInterval::MajorSixth,
-            SimpleInterval::DiminishedOctave => SimpleInterval::MajorSeventh,
-            _ => input_interval,
-        },
-        IntervalQuality::Minor => match input_interval {
-            SimpleInterval::AugmentedUnison => SimpleInterval::MinorSecond,
-            SimpleInterval::AugmentedSecond => SimpleInterval::MinorThird,
-            SimpleInterval::AugmentedFifth => SimpleInterval::MinorSixth,
-            SimpleInterval::AugmentedSixth => SimpleInterval::MinorSeventh,
-            _ => input_interval,
-        },
-        IntervalQuality::Augmented => match input_interval {
-            SimpleInterval::MinorSecond => SimpleInterval::AugmentedUnison,
-            SimpleInterval::MinorThird => SimpleInterval::AugmentedSecond,
-            SimpleInterval::PerfectFourth => SimpleInterval::AugmentedThird,
-            SimpleInterval::MinorSixth => SimpleInterval::AugmentedFifth,
-            SimpleInterval::MinorSeventh => SimpleInterval::AugmentedSixth,
-            SimpleInterval::PerfectOctave => SimpleInterval::AugmentedSeventh,
-            _ => input_interval,
-        },
-        IntervalQuality::Diminished => match input_interval {
-            SimpleInterval::PerfectUnison => SimpleInterval::DiminishedSecond,
-            SimpleInterval::MajorSecond => SimpleInterval::DiminishedThird,
-            SimpleInterval::MajorThird => SimpleInterval::DiminishedFourth,
-            SimpleInterval::PerfectFifth => SimpleInterval::DiminishedSixth,
-            SimpleInterval::MajorSixth => SimpleInterval::DiminishedSeventh,
-            SimpleInterval::MajorSeventh => SimpleInterval::DiminishedOctave,
-            _ => input_interval,
-        },
+impl TryFromStringPrefix for SimpleInterval {
+    type Error = IntoSimpleIntervalError;
+
+    fn try_from_string_prefix(value: &str) -> Result<(Self, &str), Self::Error> {
+        let name = if value.starts_with("PU") {
+            SimpleInterval::PerfectUnison
+        } else if value.starts_with("m2") {
+            SimpleInterval::MinorSecond
+        } else if value.starts_with("M2") {
+            SimpleInterval::MajorSecond
+        } else if value.starts_with("m3") {
+            SimpleInterval::MinorThird
+        } else if value.starts_with("M3") {
+            SimpleInterval::MajorThird
+        } else if value.starts_with("P4") {
+            SimpleInterval::PerfectFourth
+        } else if value.starts_with("A4") {
+            SimpleInterval::AugmentedFourth
+        } else if value.starts_with("d5") {
+            SimpleInterval::DiminishedFifth
+        } else if value.starts_with("P5") {
+            SimpleInterval::PerfectFifth
+        } else if value.starts_with("m6") {
+            SimpleInterval::MinorSixth
+        } else if value.starts_with("M6") {
+            SimpleInterval::MajorSixth
+        } else if value.starts_with("m7") {
+            SimpleInterval::MinorSeventh
+        } else if value.starts_with("M7") {
+            SimpleInterval::MajorSeventh
+        } else if value.starts_with("P8") {
+            SimpleInterval::PerfectOctave
+        } else if value.starts_with("d2") {
+            SimpleInterval::DiminishedSecond
+        } else if value.starts_with("A1") {
+            SimpleInterval::AugmentedUnison
+        } else if value.starts_with("d3") {
+            SimpleInterval::DiminishedThird
+        } else if value.starts_with("A2") {
+            SimpleInterval::AugmentedSecond
+        } else if value.starts_with("d4") {
+            SimpleInterval::DiminishedFourth
+        } else if value.starts_with("A3") {
+            SimpleInterval::AugmentedThird
+        } else if value.starts_with("d6") {
+            SimpleInterval::DiminishedSixth
+        } else if value.starts_with("A5") {
+            SimpleInterval::AugmentedFifth
+        } else if value.starts_with("d7") {
+            SimpleInterval::DiminishedSeventh
+        } else if value.starts_with("A6") {
+            SimpleInterval::AugmentedSixth
+        } else if value.starts_with("d8") {
+            SimpleInterval::DiminishedOctave
+        } else if value.starts_with("A7") {
+            SimpleInterval::AugmentedSeventh
+        } else {
+            return Err(IntoSimpleIntervalError::NoMatchingInterval(
+                value.to_string(),
+            ));
+        };
+
+        // This is hacky. We could be more efficient
+        // by keeping track of the length in this method
+        // instead of recomputing it here.
+        let prefix_length = name.to_string().len();
+        Ok((name, &value[prefix_length..]))
     }
 }
 
@@ -652,76 +795,76 @@ mod tests {
 
         let input = SimpleInterval::PerfectUnison;
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Diminished),
+            input.bias_interval_quality(IntervalQuality::Diminished),
             SimpleInterval::DiminishedSecond
         );
         // There is no enharmonic equivalent of a perfect unison with a major quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Major),
+            input.bias_interval_quality(IntervalQuality::Major),
             SimpleInterval::PerfectUnison
         );
         // There is no enharmonic equivalent of a perfect unison with a minor quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Minor),
+            input.bias_interval_quality(IntervalQuality::Minor),
             SimpleInterval::PerfectUnison
         );
         // There is no enharmoic equivalent of a perfect unison with an augmented quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Augmented),
+            input.bias_interval_quality(IntervalQuality::Augmented),
             SimpleInterval::PerfectUnison
         );
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Perfect),
+            input.bias_interval_quality(IntervalQuality::Perfect),
             SimpleInterval::PerfectUnison
         );
 
         let input = SimpleInterval::PerfectFourth;
         // There is no enharmonic equivalent of a perfect fourth with a diminished quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Diminished),
+            input.bias_interval_quality(IntervalQuality::Diminished),
             SimpleInterval::PerfectFourth
         );
         // There is no enharmonic equivalent of a perfect fourth with a major quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Major),
+            input.bias_interval_quality(IntervalQuality::Major),
             SimpleInterval::PerfectFourth
         );
         // There is no enharmonic equivalent of a perfect fourth with a minor quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Minor),
+            input.bias_interval_quality(IntervalQuality::Minor),
             SimpleInterval::PerfectFourth
         );
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Augmented),
+            input.bias_interval_quality(IntervalQuality::Augmented),
             SimpleInterval::AugmentedThird
         );
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Perfect),
+            input.bias_interval_quality(IntervalQuality::Perfect),
             SimpleInterval::PerfectFourth
         );
 
         let input = SimpleInterval::MajorThird;
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Diminished),
+            input.bias_interval_quality(IntervalQuality::Diminished),
             SimpleInterval::DiminishedFourth
         );
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Major),
+            input.bias_interval_quality(IntervalQuality::Major),
             SimpleInterval::MajorThird
         );
         // There is no enharmonic equivalent of a major third with a minor quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Minor),
+            input.bias_interval_quality(IntervalQuality::Minor),
             SimpleInterval::MajorThird
         );
         // There is no enharmonic equivalent of a major third with an augmented quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Augmented),
+            input.bias_interval_quality(IntervalQuality::Augmented),
             SimpleInterval::MajorThird
         );
         // There is no enharmonic equivalent of a major third with a perfect quality.
         assert_eq!(
-            bias_simple_interval_quality(input, IntervalQuality::Perfect),
+            input.bias_interval_quality(IntervalQuality::Perfect),
             SimpleInterval::MajorThird
         );
     }

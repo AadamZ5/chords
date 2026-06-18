@@ -1,6 +1,7 @@
 use std::{fmt::Display, ops::Add};
 
 use strum_macros::EnumIter;
+use thiserror::Error;
 
 use super::{AbstractNote, NoteModifier};
 use crate::{try_from_string_prefix::TryFromStringPrefix, Hertz, Semitone};
@@ -102,8 +103,9 @@ impl Display for RawNote {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum IntoRawNoteError {
+    #[error("Unknown pitch character: {0}")]
     InvalidNoteChar(char),
 }
 

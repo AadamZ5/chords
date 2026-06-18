@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use thiserror::Error;
+
 use crate::try_from_string_prefix::TryFromStringPrefix;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, strum_macros::EnumIter)]
@@ -27,8 +29,9 @@ impl Display for NoteModifier {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum IntoModifierError {
+    #[error("Unknown note modifier: {0}")]
     UnknownModifier(String),
 }
 
