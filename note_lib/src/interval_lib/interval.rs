@@ -3,7 +3,10 @@ use crate::{
     CompoundInterval, IntervalQuality, IntoCompoundIntervalError, Semitone,
     SimpleInterval::{self, PerfectOctave},
 };
-use std::{fmt::Display, ops::Add};
+use std::{
+    fmt::Display,
+    ops::{Add, Sub},
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Interval {
@@ -116,6 +119,15 @@ impl Add<Interval> for Interval {
         // // Try to add diatonic number and quality first, and if that fails, we can just add semitones.
         // let diatonic_number_sum = self.diatonic_number() + rhs.diatonic_number();
         // let
+    }
+}
+
+impl Sub<Interval> for Interval {
+    type Output = Interval;
+
+    fn sub(self, rhs: Interval) -> Self::Output {
+        Interval::from_semitones(self.semitones() - rhs.semitones())
+            .bias_interval_quality(self.quality())
     }
 }
 

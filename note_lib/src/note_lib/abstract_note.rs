@@ -25,6 +25,38 @@ impl AbstractNote {
         Note::new(self.raw_note, octave, self.modifier)
     }
 
+    pub fn is_enharmonic_with(&self, other: &AbstractNote) -> bool {
+        self.interval_from_c().semitones() == other.interval_from_c().semitones()
+    }
+
+    pub fn get_enharmonics(&self) -> impl Iterator<Item = AbstractNote> {
+        let interval = self.interval_from_c();
+        let this_note = *self;
+
+        NoteModifier::iter_common_modifiers()
+            .map(move |modifier| {
+                bias_abstract_note_to_enharmonic_equivalent(
+                    &AbstractNote::from_interval_from_c(interval, modifier.into()),
+                    modifier,
+                )
+            })
+            .filter(move |note| note != &this_note)
+    }
+
+    pub fn get_enharmonics_extended(&self) -> impl Iterator<Item = AbstractNote> {
+        let interval = self.interval_from_c();
+        let this_note = *self;
+
+        NoteModifier::iter_all_modifiers()
+            .map(move |modifier| {
+                bias_abstract_note_to_enharmonic_equivalent(
+                    &AbstractNote::from_interval_from_c(interval, modifier.into()),
+                    modifier,
+                )
+            })
+            .filter(move |note| note != &this_note)
+    }
+
     /// Gets the abstract note's interval from C
     pub fn interval_from_c(&self) -> SimpleInterval {
         let mut semitones_from_c = 0;
@@ -197,7 +229,7 @@ pub enum AbstractNoteParseError {
     EmptyInput,
     #[error("Invalid note format: {0}")]
     InvalidNote(String),
-    #[error("Invalid note modifier: {0}")]
+    #[error("Invalid note modifier: {0} (expected #, b, ##, bb, or nothing)")]
     InvalidModifier(String),
     #[error("Input too long")]
     InputTooLong,
@@ -351,6 +383,52 @@ mod tests {
         let abstract_note: AbstractNote = note.into();
         assert_eq!(abstract_note.raw_note, RawNote::C);
         assert_eq!(abstract_note.modifier, NoteModifier::Natural);
+    }
+
+    #[test]
+    fn should_create_from_interval_from_c() {
+        let interval = SimpleInterval::MajorThird;
+        let abstract_note = AbstractNote::from_interval_from_c(interval, ModifierPreference::Sharp);
+        assert_eq!(abstract_note.raw_note, RawNote::E);
+        assert_eq!(abstract_note.modifier, NoteModifier::Natural);
+
+        let interval = SimpleInterval::MinorThird;
+        let abstract_note = AbstractNote::from_interval_from_c(interval, ModifierPreference::Sharp);
+        assert_eq!(abstract_note.raw_note, RawNote::D);
+        assert_eq!(abstract_note.modifier, NoteModifier::Sharp);
+    }
+
+    #[test]
+    fn should_equal_only_when_exact() {
+        let note1 = AbstractNote {
+            raw_note: RawNote::C,
+            modifier: NoteModifier::Natural,
+        };
+        let note2 = AbstractNote {
+            raw_note: RawNote::C,
+            modifier: NoteModifier::Sharp,
+        };
+        let note3 = AbstractNote {
+            raw_note: RawNote::C,
+            modifier: NoteModifier::Natural,
+        };
+
+        assert_eq!(note1, note3);
+        assert_ne!(note1, note2);
+    }
+
+    #[test]
+    fn should_equal_enharmonics() {
+        let note1 = AbstractNote {
+            raw_note: RawNote::C,
+            modifier: NoteModifier::Sharp,
+        };
+        let note2 = AbstractNote {
+            raw_note: RawNote::D,
+            modifier: NoteModifier::Flat,
+        };
+
+        assert!(note1.is_enharmonic_with(&note2));
     }
 
     #[test]

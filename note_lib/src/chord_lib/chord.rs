@@ -1,6 +1,6 @@
 use std::ops::Add;
 
-use crate::{Note, SimpleInterval};
+use crate::{AbstractNote, ChordQuality, Note, SimpleInterval};
 
 #[derive(PartialEq, Clone, Debug, Default)]
 pub struct Chord {
@@ -16,6 +16,11 @@ impl Chord {
         Chord {
             notes: notes.into_iter().collect(),
         }
+    }
+
+    /// Creates a chord from a root note and a chord quality.
+    pub fn new_from_root_and_quality(root: Note, quality: ChordQuality) -> Self {
+        quality.to_chord(root)
     }
 
     pub fn notes(&self) -> &[Note] {
@@ -35,6 +40,33 @@ impl Chord {
         T: IntoIterator<Item = Note>,
     {
         self.notes = notes.into_iter().collect();
+    }
+
+    /// Checks if a chord contains a particular [Note], and returns the index of the note if it exists.
+    pub fn contains_note(&self, note: &Note) -> Option<usize> {
+        self.notes.iter().position(|n| n == note)
+    }
+
+    /// Checks if a chord contains a particular [Note] that is enharmonically equivalent to the provided note,
+    /// and returns the index of the note if it exists.
+    pub fn contains_enharmonic_note(&self, note: &Note) -> Option<usize> {
+        self.notes.iter().position(|n| n.is_enharmonic_with(note))
+    }
+
+    /// Checks if a chord contains an abstract note, and returns the index of the [Note] that
+    /// satisfies the [AbstractNote] criteria, if such a [Note] exists in this chord.
+    pub fn contains_abstract_note(&self, abstract_note: &AbstractNote) -> Option<usize> {
+        self.notes
+            .iter()
+            .position(|note| note.abstract_note() == *abstract_note)
+    }
+
+    /// Checks if a chord contains a note that is enharmonically equivalent to the provided abstract note,
+    /// and returns the index of the [Note] that satisfies the enharmonic criteria, if such a [Note] exists in this chord.
+    pub fn contains_enharmonic_abstract_note(&self, abstract_note: &AbstractNote) -> Option<usize> {
+        self.notes
+            .iter()
+            .position(|note| note.abstract_note().is_enharmonic_with(&abstract_note))
     }
 
     /// Is this chord empty? A chord is empty if it has no notes.

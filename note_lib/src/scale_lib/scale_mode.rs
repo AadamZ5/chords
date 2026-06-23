@@ -1,9 +1,14 @@
+use std::fmt::Display;
+
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
+
 use super::ScaleDegree;
-use crate::{AbstractNote, SimpleInterval};
+use crate::{AbstractNote, Chord, Note, SimpleInterval};
 
 /// ScaleMode represents the various patterns of notes that can be created
 /// from a root note.
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Default, EnumIter)]
 pub enum ScaleMode {
     /// Ionian represents the diatonic major scale.
     /// https://en.wikipedia.org/wiki/Mode_(music)#Ionian_(I)
@@ -182,14 +187,73 @@ impl ScaleMode {
     ///
     /// assert_eq!(note_at_degree, AbstractNote::try_from("E").unwrap());
     /// ```
-    pub fn note_at_degree(&self, root: AbstractNote, degree: ScaleDegree) -> AbstractNote {
+    pub fn note_at_degree(&self, scale_root: AbstractNote, degree: ScaleDegree) -> AbstractNote {
         let interval = self.interval_at_degree(degree);
-        root.add_interval(interval)
+        scale_root.add_interval(interval)
+    }
+
+    /// Forms a chord at the given degree of the scale, using a scale root as reference.
+    ///
+    /// The note will be formed using a unison, third, and fifth above the given
+    /// degree of the scale.
+    pub fn chord_at_degree(&self, scale_root: Note, degree: ScaleDegree) -> Chord {
+        // This will be degrees starting at the requested one
+        let mut degrees = ScaleDegree::iter_degrees()
+            .cycle()
+            .skip_while(|d| *d != degree);
+
+        let chord_root = self
+            .note_at_degree(scale_root.abstract_note(), degree)
+            .at_octave(scale_root.octave());
+
+        // Unwrap safety: Our iterator should be `cycle`d so it will loop forever.
+        // Skip including the first degree (with `nth(2)`) since we will already know the root degree
+        let degree_for_third = degrees.nth(2).unwrap();
+        let degree_for_fifth = degrees.nth(1).unwrap();
+
+        let mut chord_third = self
+            .note_at_degree(scale_root.abstract_note(), degree_for_third)
+            .at_octave(scale_root.octave());
+        let mut chord_fifth = self
+            .note_at_degree(scale_root.abstract_note(), degree_for_fifth)
+            .at_octave(scale_root.octave());
+
+        // Both the third and fifth should be above the root.
+        if chord_third.octave() < chord_root.octave() {
+            chord_third = chord_third + SimpleInterval::PerfectOctave;
+        }
+        if chord_fifth.octave() < chord_root.octave() {
+            chord_fifth = chord_fifth + SimpleInterval::PerfectOctave;
+        }
+
+        Chord::new([chord_root, chord_third, chord_fifth])
+    }
+
+    /// Iterate over all defined scale modes.
+    pub fn iter_scale_modes() -> ScaleModeIter {
+        Self::iter()
+    }
+}
+
+impl Display for ScaleMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mode_name = match self {
+            ScaleMode::Ionian => "Ionian",
+            ScaleMode::Dorian => "Dorian",
+            ScaleMode::Phrygian => "Phrygian",
+            ScaleMode::Lydian => "Lydian",
+            ScaleMode::Mixolydian => "Mixolydian",
+            ScaleMode::Aeolian => "Aeolian",
+            ScaleMode::Locrian => "Locrian",
+        };
+        write!(f, "{}", mode_name)
     }
 }
 
 #[cfg(test)]
 mod tests {
+
+    use crate::RawNote;
 
     use super::*;
 
@@ -484,6 +548,22 @@ mod tests {
         assert_eq!(
             locrian_intervals(ScaleDegree::Octave),
             SimpleInterval::PerfectOctave
+        );
+    }
+
+    #[test]
+    fn ionian_chords() {
+        // Assert notes in first degree chord of Ionian mode
+        let root = AbstractNote::from(RawNote::G).at_octave(4);
+        let mode = ScaleMode::Ionian;
+        let chord = mode.chord_at_degree(root, ScaleDegree::First);
+        assert_eq!(
+            chord.notes(),
+            &[
+                AbstractNote::from(RawNote::G).at_octave(4),
+                AbstractNote::from(RawNote::B).at_octave(4),
+                AbstractNote::from(RawNote::D).at_octave(4)
+            ]
         );
     }
 }

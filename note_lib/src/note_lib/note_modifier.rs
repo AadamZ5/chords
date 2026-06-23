@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
-use thiserror::Error;
-
 use crate::try_from_string_prefix::TryFromStringPrefix;
+use strum::IntoEnumIterator;
+use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, strum_macros::EnumIter)]
 pub enum NoteModifier {
@@ -13,6 +13,31 @@ pub enum NoteModifier {
     Sharp,
     DoubleSharp,
     // TODO: How do we handle microtonal hoopla?
+}
+
+impl NoteModifier {
+    pub fn get_semitone_adjustment(&self) -> i32 {
+        match self {
+            NoteModifier::DoubleFlat => -2,
+            NoteModifier::Flat => -1,
+            NoteModifier::Natural => 0,
+            NoteModifier::Sharp => 1,
+            NoteModifier::DoubleSharp => 2,
+        }
+    }
+
+    pub fn iter_all_modifiers() -> NoteModifierIter {
+        Self::iter()
+    }
+
+    pub fn iter_common_modifiers() -> impl Iterator<Item = NoteModifier> {
+        Self::iter().filter(|m| {
+            matches!(
+                m,
+                NoteModifier::Flat | NoteModifier::Natural | NoteModifier::Sharp
+            )
+        })
+    }
 }
 
 impl Display for NoteModifier {

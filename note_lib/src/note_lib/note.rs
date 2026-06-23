@@ -35,12 +35,36 @@ impl Note {
         self.octave
     }
 
+    pub fn abstract_note(&self) -> AbstractNote {
+        self.abstract_note
+    }
+
     pub fn raw_note(&self) -> RawNote {
         self.abstract_note.raw_note
     }
 
     pub fn modifier(&self) -> NoteModifier {
         self.abstract_note.modifier
+    }
+
+    pub fn is_enharmonic_with(&self, other: &Note) -> bool {
+        self.to_semitones_from_c0() == other.to_semitones_from_c0()
+    }
+
+    pub fn get_enharmonics(&self) -> impl Iterator<Item = Note> {
+        let this_octave = self.octave;
+
+        self.abstract_note
+            .get_enharmonics()
+            .map(move |abstract_note| abstract_note.at_octave(this_octave))
+    }
+
+    pub fn get_enharmonics_extended(&self) -> impl Iterator<Item = Note> {
+        let this_octave = self.octave;
+
+        self.abstract_note
+            .get_enharmonics_extended()
+            .map(move |abstract_note| abstract_note.at_octave(this_octave))
     }
 
     pub fn from_semitones_from_c0(

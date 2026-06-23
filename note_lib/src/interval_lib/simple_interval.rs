@@ -4,6 +4,7 @@ use crate::{
     try_from_string_prefix::TryFromStringPrefix, IntervalQuality, OtherCompoundInterval, Semitone,
     SimpleIntervalFromSemitones,
 };
+use strum::IntoEnumIterator;
 
 /// Simple interval numbers represent the "rank" of the interval. For example,
 /// a minor third and a major third both have an interval number of "third". The
@@ -480,6 +481,12 @@ impl SimpleInterval {
         SimpleIntervalFromSemitones::new(self.semitones()).add_semitones(semitones)
     }
 
+    /// Iterate over all defined simple intervals. This includes both augmented and diminished intervals,
+    /// up to and including a perfect octave.
+    pub fn iter_simple_intervals() -> SimpleIntervalIter {
+        Self::iter()
+    }
+
     /// Given an input interval, will match to an enharmonically equivalent interval
     /// of the given `bias_quality` if one exists. If no enharmonically equivalent
     /// interval exists, or if the input interval is already of the given
@@ -531,6 +538,62 @@ impl SimpleInterval {
                 _ => *self,
             },
         }
+    }
+
+    pub fn is_perfect(&self) -> bool {
+        matches!(
+            self,
+            SimpleInterval::PerfectUnison
+                | SimpleInterval::PerfectFourth
+                | SimpleInterval::PerfectFifth
+                | SimpleInterval::PerfectOctave
+        )
+    }
+
+    pub fn is_major(&self) -> bool {
+        matches!(
+            self,
+            SimpleInterval::MajorSecond
+                | SimpleInterval::MajorThird
+                | SimpleInterval::MajorSixth
+                | SimpleInterval::MajorSeventh
+        )
+    }
+
+    pub fn is_minor(&self) -> bool {
+        matches!(
+            self,
+            SimpleInterval::MinorSecond
+                | SimpleInterval::MinorThird
+                | SimpleInterval::MinorSixth
+                | SimpleInterval::MinorSeventh
+        )
+    }
+
+    pub fn is_augmented(&self) -> bool {
+        matches!(
+            self,
+            SimpleInterval::AugmentedUnison
+                | SimpleInterval::AugmentedSecond
+                | SimpleInterval::AugmentedThird
+                | SimpleInterval::AugmentedFourth
+                | SimpleInterval::AugmentedFifth
+                | SimpleInterval::AugmentedSixth
+                | SimpleInterval::AugmentedSeventh
+        )
+    }
+
+    pub fn is_diminished(&self) -> bool {
+        matches!(
+            self,
+            SimpleInterval::DiminishedSecond
+                | SimpleInterval::DiminishedThird
+                | SimpleInterval::DiminishedFourth
+                | SimpleInterval::DiminishedFifth
+                | SimpleInterval::DiminishedSixth
+                | SimpleInterval::DiminishedSeventh
+                | SimpleInterval::DiminishedOctave
+        )
     }
 }
 

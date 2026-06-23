@@ -42,7 +42,7 @@ impl ChordQuality {
         let intervals = self.to_intervals();
 
         // Build notes by adding intervals to the root note.
-        std::iter::once(root).chain(intervals.map(move |interval| root.add_interval(interval)))
+        std::iter::once(root).chain(intervals.map(move |interval| root + interval))
     }
 
     /// Returns a chord with the notes of the quality formed from the root note.
