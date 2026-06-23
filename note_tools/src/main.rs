@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use note_lib::{AbstractNote, Interval, Note};
+use note_lib::{AbstractNote, Interval, Note, Scale, ScaleDegree, ScaleMode};
 
 mod explore_root;
 
@@ -77,6 +77,14 @@ enum NoteToolsCommand {
         )]
         doubles: bool,
     },
+
+    #[command(about = "Print all notes in a given scale mode")]
+    PrintModeNotes {
+        #[arg(value_name = "ROOT", help = "The root note of the scale mode, e.g. C#")]
+        root_note: String,
+        #[arg(value_name = "MODE", help = "The scale mode, e.g. Ionian")]
+        scale_mode: String,
+    },
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -150,6 +158,24 @@ fn execute_cli(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
                     println!("{}", enharmonic);
                 }
             }
+        }
+        NoteToolsCommand::PrintModeNotes {
+            root_note,
+            scale_mode,
+        } => {
+            let root_note = AbstractNote::try_from(root_note.as_str())?;
+            let scale_mode = ScaleMode::try_from(scale_mode.as_str())?;
+
+            let scale = Scale::new(root_note, scale_mode);
+            println!("Notes in {} {}:", root_note, scale_mode);
+            for degree in ScaleDegree::iter_degrees() {
+                print!("{}\t", degree);
+            }
+            println!();
+            for note in scale {
+                print!("{}\t", note);
+            }
+            println!();
         }
     }
     Ok(())

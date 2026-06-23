@@ -4,7 +4,9 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use super::ScaleDegree;
-use crate::{AbstractNote, Chord, Note, SimpleInterval};
+use crate::{
+    try_from_string_prefix::TryFromStringPrefix, AbstractNote, Chord, Note, SimpleInterval,
+};
 
 /// ScaleMode represents the various patterns of notes that can be created
 /// from a root note.
@@ -247,6 +249,58 @@ impl Display for ScaleMode {
             ScaleMode::Locrian => "Locrian",
         };
         write!(f, "{}", mode_name)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, thiserror::Error)]
+pub enum IntoScaleModeError {
+    #[error("Input string is empty")]
+    EmptyInput,
+    #[error("Invalid scale mode: {0}")]
+    InvalidScaleMode(String),
+}
+
+impl TryFromStringPrefix for ScaleMode {
+    type Error = IntoScaleModeError;
+
+    fn try_from_string_prefix(value: &str) -> Result<(Self, &str), Self::Error> {
+        let value = value.trim_start();
+        if value.is_empty() {
+            return Err(IntoScaleModeError::EmptyInput);
+        }
+
+        // TODO: Support mixed case, e.g. "ionian" or "IONIAN" or even "IoNiAn".
+        let (mode, remaining) = if let Some(remaining) = value.strip_prefix("Ionian") {
+            (ScaleMode::Ionian, remaining)
+        } else if let Some(remaining) = value.strip_prefix("Dorian") {
+            (ScaleMode::Dorian, remaining)
+        } else if let Some(remaining) = value.strip_prefix("Phrygian") {
+            (ScaleMode::Phrygian, remaining)
+        } else if let Some(remaining) = value.strip_prefix("Lydian") {
+            (ScaleMode::Lydian, remaining)
+        } else if let Some(remaining) = value.strip_prefix("Mixolydian") {
+            (ScaleMode::Mixolydian, remaining)
+        } else if let Some(remaining) = value.strip_prefix("Aeolian") {
+            (ScaleMode::Aeolian, remaining)
+        } else if let Some(remaining) = value.strip_prefix("Locrian") {
+            (ScaleMode::Locrian, remaining)
+        } else {
+            return Err(IntoScaleModeError::InvalidScaleMode(value.to_string()));
+        };
+
+        Ok((mode, remaining))
+    }
+}
+
+impl TryFrom<&str> for ScaleMode {
+    type Error = IntoScaleModeError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let (mode, remaining) = ScaleMode::try_from_string_prefix(value)?;
+        if !remaining.trim().is_empty() {
+            return Err(IntoScaleModeError::InvalidScaleMode(value.to_string()));
+        }
+        Ok(mode)
     }
 }
 
