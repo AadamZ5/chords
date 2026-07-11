@@ -1,5 +1,6 @@
 use std::{fmt::Display, ops::Add};
 
+use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use thiserror::Error;
 
@@ -7,10 +8,8 @@ use super::{AbstractNote, NoteModifier};
 use crate::{try_from_string_prefix::TryFromStringPrefix, Hertz, Semitone};
 
 /// A note without an octave or modifier. This is the most basic representation of a note.
-#[derive(PartialEq, Clone, Copy, Debug, Default, EnumIter)]
+#[derive(PartialEq, Clone, Copy, Debug, Default, EnumIter, Hash, Eq)]
 pub enum RawNote {
-    /// A note that does not fit on the largely used 12-tone scale.
-    Incongruent(Hertz),
     #[default]
     C,
     D,
@@ -22,6 +21,14 @@ pub enum RawNote {
 }
 
 impl RawNote {
+    /// Apply a [NoteModifier] to this [RawNote] and return an [AbstractNote].
+    pub fn with_modifier(&self, modifier: NoteModifier) -> AbstractNote {
+        AbstractNote {
+            raw_note: *self,
+            modifier,
+        }
+    }
+
     /// Returns the next note in the abstract note scale, along with the number of semitones to get there.
     pub fn next_note(&self) -> (RawNote, Semitone) {
         match self {
@@ -32,7 +39,7 @@ impl RawNote {
             RawNote::G => (RawNote::A, 2),
             RawNote::A => (RawNote::B, 2),
             RawNote::B => (RawNote::C, 1),
-            RawNote::Incongruent(_) => panic!(),
+            // RawNote::Incongruent(_) => panic!(),
         }
     }
 
@@ -46,7 +53,7 @@ impl RawNote {
             RawNote::G => (RawNote::F, 2),
             RawNote::A => (RawNote::G, 2),
             RawNote::B => (RawNote::A, 2),
-            RawNote::Incongruent(_) => panic!(),
+            // RawNote::Incongruent(_) => panic!(),
         }
     }
 
@@ -60,7 +67,7 @@ impl RawNote {
 
         // TODO: Implement the MIDI algorithm from https://newt.phys.unsw.edu.au/jw/notes.html instead!
         match raw_note {
-            RawNote::Incongruent(hz) => hz,
+            // RawNote::Incongruent(hz) => hz,
             RawNote::C => 16.35,
             RawNote::D => 18.35,
             RawNote::E => 20.60,
@@ -76,6 +83,10 @@ impl RawNote {
     pub fn to_hertz(&self) -> Hertz {
         RawNote::raw_note_to_hz(*self)
     }
+
+    pub fn iter_raw_notes() -> RawNoteIter {
+        Self::iter()
+    }
 }
 
 pub const C: RawNote = RawNote::C;
@@ -89,7 +100,7 @@ pub const B: RawNote = RawNote::B;
 impl Display for RawNote {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let note = match self {
-            RawNote::Incongruent(_) => "Incongruent",
+            // RawNote::Incongruent(_) => "Incongruent",
             RawNote::C => "C",
             RawNote::D => "D",
             RawNote::E => "E",

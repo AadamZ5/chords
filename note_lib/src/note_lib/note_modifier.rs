@@ -4,7 +4,9 @@ use crate::try_from_string_prefix::TryFromStringPrefix;
 use strum::IntoEnumIterator;
 use thiserror::Error;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, strum_macros::EnumIter)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, strum_macros::EnumIter, Hash,
+)]
 pub enum NoteModifier {
     DoubleFlat,
     Flat,

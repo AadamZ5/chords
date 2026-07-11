@@ -12,7 +12,7 @@ use std::{
     vec,
 };
 
-#[derive(PartialEq, Clone, Debug, Copy, Default)]
+#[derive(PartialEq, Clone, Debug, Copy, Default, Hash)]
 pub struct Note {
     abstract_note: AbstractNote,
     octave: Octave,
@@ -107,7 +107,6 @@ impl Note {
         while current_note != RawNote::C {
             match current_note {
                 RawNote::C => (),
-                RawNote::Incongruent(_) => unreachable!(),
                 _ => {
                     let (prev_note, semitones_to_prev_note) = current_note.prev_note();
                     current_note = prev_note;

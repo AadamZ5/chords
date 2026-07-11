@@ -13,13 +13,17 @@ use super::{ModifierPreference, Note, NoteModifier, RawNote};
 
 /// Represents a note that has a modifier, but no octave defined.
 /// This is typically used when talking about [`super::super::ScaleMode`]s
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Default, Hash, Eq)]
 pub struct AbstractNote {
     pub raw_note: RawNote,
     pub modifier: NoteModifier,
 }
 
 impl AbstractNote {
+    pub fn new(raw_note: RawNote, modifier: NoteModifier) -> Self {
+        Self { raw_note, modifier }
+    }
+
     /// Creates an octave-placed note using this note's raw note and modifier.
     pub fn at_octave(&self, octave: i32) -> Note {
         Note::new(self.raw_note, octave, self.modifier)
@@ -43,6 +47,13 @@ impl AbstractNote {
             .filter(move |note| note != &this_note)
     }
 
+    pub fn iter_abstract_notes() -> impl Iterator<Item = AbstractNote> {
+        RawNote::iter_raw_notes().flat_map(|raw_note| {
+            NoteModifier::iter_common_modifiers()
+                .map(move |modifier| AbstractNote { raw_note, modifier })
+        })
+    }
+
     pub fn get_enharmonics_extended(&self) -> impl Iterator<Item = AbstractNote> {
         let interval = self.interval_from_c();
         let this_note = *self;
@@ -64,7 +75,6 @@ impl AbstractNote {
         while current_note != RawNote::C {
             match current_note {
                 RawNote::C => (),
-                RawNote::Incongruent(_) => unreachable!(),
                 _ => {
                     let (prev_note, semitones_to_prev_note) = current_note.prev_note();
                     current_note = prev_note;
@@ -569,7 +579,7 @@ mod tests {
 
         let mut notes: Vec<AbstractNote> = Vec::new();
 
-        for note in RawNote::iter().filter(|n| !matches!(n, RawNote::Incongruent(_))) {
+        for note in RawNote::iter() {
             for modifier in NoteModifier::iter() {
                 notes.push(AbstractNote {
                     raw_note: note,

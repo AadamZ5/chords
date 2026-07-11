@@ -44,7 +44,7 @@ pub fn chord_edit(ui: &mut egui::Ui, chord_edit_ctx: &mut ChordContext) -> Optio
             .selected_text(&current_root_and_modifier)
             .show_ui(ui, |ui| {
                 RawNote::iter()
-                    .filter(|raw_note| !matches!(raw_note, RawNote::Incongruent(_)))
+                    // .filter(|raw_note| !matches!(raw_note, RawNote::Incongruent(_)))
                     .flat_map(|raw_note| {
                         [
                             RawNoteOption::new(raw_note, NoteModifier::Flat),

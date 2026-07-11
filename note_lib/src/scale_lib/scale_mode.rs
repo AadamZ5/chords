@@ -5,7 +5,8 @@ use strum_macros::EnumIter;
 
 use super::ScaleDegree;
 use crate::{
-    try_from_string_prefix::TryFromStringPrefix, AbstractNote, Chord, Note, SimpleInterval,
+    try_from_string_prefix::TryFromStringPrefix, AbstractNote, Chord, Note, NoteModifier,
+    SimpleInterval,
 };
 
 /// ScaleMode represents the various patterns of notes that can be created
@@ -191,7 +192,36 @@ impl ScaleMode {
     /// ```
     pub fn note_at_degree(&self, scale_root: AbstractNote, degree: ScaleDegree) -> AbstractNote {
         let interval = self.interval_at_degree(degree);
-        scale_root.add_interval(interval)
+
+        let mut raw_pitch = scale_root.raw_note;
+        // Adjust our starting semitone count for the scale root's modifier.
+        // For example, if the scale root is C#, then we need to start our semitone count at -1, since C# is one semitone above C.
+        // This makes sure our adjustment later with `remaining_semitones` is correct. As in the example, if we are looking for the
+        // third degree of C# Ionian, we would expect E# (which is F) to be the result. If we didn't adjust for the scale root's modifier,
+        // we would end up with E instead of E#.
+        let mut semitones_acc = 0 - scale_root.modifier.get_semitone_adjustment();
+
+        // When traversing a scale mode, you travel through the notes of the scale instead of just determining a note
+        // added from an interval. So for an example, if the root's pitch is D, the fourth degree would be G, regardless
+        // of the modifier applied to the root.
+        for _ in 1..=(degree as u8) {
+            let (next_pitch, semitones_traveled) = raw_pitch.next_note();
+            raw_pitch = next_pitch;
+            semitones_acc += semitones_traveled;
+        }
+
+        let remaining_semitones = interval.semitones() - semitones_acc;
+
+        // Adjust the raw pitch to the correct modifier based on the remaining semitones to reach the desired interval.
+        match remaining_semitones {
+            -2 => raw_pitch.with_modifier(NoteModifier::DoubleFlat),
+            -1 => raw_pitch.with_modifier(NoteModifier::Flat),
+            0 => raw_pitch.with_modifier(NoteModifier::Natural),
+            1 => raw_pitch.with_modifier(NoteModifier::Sharp),
+            2 => raw_pitch.with_modifier(NoteModifier::DoubleSharp),
+            // TODO: We should probably just add the remaining semitones to the raw pitch and return that.
+            _ => panic!("Unexpected number of semitones remaining for a note modifier: {}. This should not happen.", remaining_semitones),
+        }
     }
 
     /// Forms a chord at the given degree of the scale, using a scale root as reference.

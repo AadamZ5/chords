@@ -85,6 +85,12 @@ enum NoteToolsCommand {
         #[arg(value_name = "MODE", help = "The scale mode, e.g. Ionian")]
         scale_mode: String,
     },
+
+    #[command(about = "Print a matrix of scale degrees and the notes that are in the scale mode")]
+    PrintModeMatrix {
+        #[arg(value_name = "MODE", help = "The scale mode, e.g. Ionian")]
+        scale_mode: String,
+    },
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -176,6 +182,22 @@ fn execute_cli(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
                 print!("{}\t", note);
             }
             println!();
+        }
+        NoteToolsCommand::PrintModeMatrix { scale_mode } => {
+            let scale_mode = ScaleMode::try_from(scale_mode.as_str())?;
+
+            println!("Scale degree note matrix for {}:", scale_mode);
+            for degree in ScaleDegree::iter_degrees() {
+                print!("{}\t", degree);
+            }
+            println!();
+            for root_note in AbstractNote::iter_abstract_notes() {
+                let scale = Scale::new(root_note, scale_mode);
+                for note in scale {
+                    print!("{}\t", note);
+                }
+                println!();
+            }
         }
     }
     Ok(())
