@@ -379,7 +379,7 @@ mod tests {
         );
         assert_eq!(
             mode.note_at_degree(root, ScaleDegree::Seventh),
-            AbstractNote::try_from("B").unwrap()
+            AbstractNote::try_from("A##").unwrap()
         );
     }
 
